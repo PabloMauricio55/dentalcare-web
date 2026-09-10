@@ -1,11 +1,23 @@
-# Componentes
+# Componentes compartidos
 
-src/modules/<module>/components: componentes específicos de un dominio.
-src/shared/components: componentes verdaderamente reutilizables.
+Los componentes reutilizables se encuentran en `src/shared/components` y se exportan desde su `index.ts`.
 
-Un componente no pasa a shared solo porque podría reutilizarse en el futuro: debe existir una necesidad real.
-Revisar lo existente antes de duplicar componentes.
-Áreas preparadas: ui, forms, tables, feedback, navigation y data-display.
-shared/layouts queda reservado para composiciones reutilizables.
-Las carpetas permanecen vacías salvo .gitkeep; no crear Button, Input, Modal, DataTable ni otros ejemplos.
-Advertir y coordinar cambios compartidos según AGENTS.md.
+| Componente | Uso |
+| --- | --- |
+| `PageHeader` | Título y contexto de una vista |
+| `DataTable` | Tablas de datos con columnas configurables |
+| `Pagination` | Navegación visual entre páginas |
+| `SearchInput` | Búsqueda general accesible |
+| `StatusBadge` | Estados mediante etiquetas de color |
+| `Modal` | Formularios y detalles superpuestos |
+| `ConfirmDialog` | Confirmación de acciones sensibles |
+| `EmptyState` | Estado sin resultados o registros |
+| `LoadingState` | Estado de carga |
+| `StatCard` | Indicadores resumidos |
+| `Button` | Acciones con variantes consistentes |
+| `ActionNotice` | Resultado o confirmación visual |
+| `ModulePlaceholder` | Pantalla temporal para módulos pendientes |
+
+Los componentes específicos permanecen dentro de `src/modules/<modulo>/components`. Antes de agregar uno a `shared`, se debe comprobar que será reutilizado por más de un dominio y coordinar el cambio para evitar conflictos.
+
+La demostración de los componentes compartidos está disponible en `/componentes`.

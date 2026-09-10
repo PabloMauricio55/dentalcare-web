@@ -1,10 +1,10 @@
 # Alcance - Integrante 2
 
-Nombre y username: no verificados.
+Nombre: Daniel (Danjo). Username: `Daniel700392`.
 
-## Rama individual prevista
+## Ramas
 
-feature/integrante-2. No creada en esta preparación.
+Se utiliza una rama por ticket creada desde `develop`, con el patrón `feature/issue-N-descripcion`.
 
 ## Áreas
 
@@ -27,8 +27,8 @@ Agenda, pacientes y configuración.
 Trabajar únicamente en Issues asignados al integrante y dentro de este alcance.
 Tener acceso a un módulo no significa implementar todas sus funcionalidades. Solo implementar lo solicitado por el Issue actual.
 No modificar módulos ajenos: detenerse e informar dependencia, módulo e integrante involucrado.
-La distribución es inicial; GitHub prevalece en asignaciones. No se pudieron verificar las asignaciones remotas; las discrepancias quedan pendientes de revisión humana, sin modificar GitHub.
-Dashboard no está asignado. Coordinar antes de intervenir.
+GitHub prevalece en las asignaciones. Los Issues #1, #4 y #5 fueron asignados a `Daniel700392` y ya se integraron en `develop` mediante los Pull Requests #14, #15 y #16.
+El Panel de inicio forma parte del alcance verificado del ticket #4.
 
 
 ## Archivos globales que requieren coordinación

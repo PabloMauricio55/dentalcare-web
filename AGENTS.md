@@ -72,9 +72,8 @@ El portal no autoriza al integrante 1 a modificar módulos ajenos.
 También coordinar cambios en documentación común, AGENTS.md y .github/**.
 La lista incluye archivos futuros. Modificarlos solo si el Issue lo necesita, advirtiendo antes del cambio y explicando el impacto.
 
-## Preparación inicial
+## Estado del proyecto
 
-Solo organización, arquitectura y documentación; nuevas áreas vacías salvo .gitkeep.
-No implementar, modificar o cerrar Issues. No crear páginas, lógica, providers, middleware, contratos o ejemplos funcionales.
-No crear/cambiar ramas, commits, push, merge ni rebase durante esta preparación.
-El repositorio se recibió en main y solo con README.md: la preparación documental autorizada conserva esa rama por instrucción expresa. Esta excepción no habilita desarrollo futuro en main.
+La preparación inicial ya concluyó. El proyecto ejecutable, el layout privado y los componentes compartidos del Issue #1, Agenda y pacientes del Issue #4, y Configuración del Issue #5 están integrados en `develop`.
+
+El desarrollo continúa con una rama por ticket creada desde `develop` y un Pull Request hacia `develop`. Los módulos pendientes conservan pantallas o estructuras temporales que solo debe reemplazar su responsable según el Issue vigente.

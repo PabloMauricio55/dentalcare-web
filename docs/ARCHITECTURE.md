@@ -1,41 +1,39 @@
 # Arquitectura
 
-## Estado inspeccionado
+## Estado actual
 
-El repositorio inicial solo contenía README.md. No existían src, rutas, componentes, lógica funcional, estilos, configuración de aplicación ni documentación adicional.
-No hay package.json, lockfile, next.config o tsconfig. Versión de Next.js, TypeScript, dependencias y aliases: no definidos. App Router aún no está instalado/configurado.
+DentalCare Web es una aplicación ejecutable construida con Next.js 16, React 19 y TypeScript. Utiliza App Router, datos simulados y persistencia temporal durante la sesión; todavía no consume un backend.
 
-## Objetivo
+## Organización
 
-Next.js App Router + Route Groups + Feature-Based Architecture + módulos por dominio.
+- `src/app`: rutas, layouts y composición de las pantallas.
+- `src/modules`: funcionalidad separada por dominio.
+- `src/shared`: componentes, layouts, tipos y utilidades reutilizables.
+- `src/providers`: estado global que deba compartirse entre dominios.
+- `team`: alcance y reglas particulares de cada integrante.
+- `docs`: acuerdos técnicos y estado del proyecto.
 
-- src/app: routing, composición de pantalla y parámetros de ruta.
-- src/modules: código específico de cada dominio.
-- src/shared: piezas realmente reutilizadas entre dominios.
-- src/providers: composición futura de providers según necesidades verificadas.
-- team: instrucciones y alcances individuales.
-- docs y .github: acuerdos y revisión.
+Los grupos `(public)`, `(auth)`, `(patient)` y `(private)` organizan las rutas sin aparecer en la URL. El layout privado aporta la barra lateral, el encabezado, la navegación, el selector simulado de rol y el área principal responsive.
 
-La estructura se prepara inicialmente vacía para que cada integrante desarrolle según sus GitHub Issues. Todavía no es una aplicación ejecutable.
-layout.tsx, globals.css y middleware.ts son referencias conceptuales futuras; no se crean archivos ficticios. Al inicializar el framework deberá confirmarse la versión y su convención aplicable de protección de rutas.
-
-## Responsabilidades futuras
+## Capas de cada módulo
 
 | Capa | Responsabilidad |
 | --- | --- |
-| Page | Routing, composición de pantalla, parámetros de ruta |
-| Component | Interfaz visual |
-| Hook | Estado y comportamiento React |
-| Service | Comunicación con backend |
-| DTO | Contrato de entrada/salida de API |
-| Model | Representación interna del frontend |
-| Mapper | Transformación DTO ↔ Model |
-| Validation | Validaciones |
-| Types | Tipos específicos del módulo |
-| Constants | Constantes propias del módulo |
+| `page.tsx` | Enrutamiento y composición mínima |
+| `components` | Interfaz y comportamiento visual |
+| `models` | Representación interna del dominio |
+| `dtos` | Forma de los datos externos o simulados |
+| `adapters` | Transformación DTO → modelo |
+| `services` | Acceso a datos simulados y futura API |
+| `mocks` | Datos de demostración |
+| `validation` | Reglas de validación del dominio |
 
-Solicitud: Page → Component → Hook → Service → HTTP Client → Backend.
+Flujo previsto al conectar el backend:
 
-Respuesta: Backend → DTO → Mapper → Model → Hook → Component → UI.
+`Page → Component/Hook → Service → API → DTO → Adapter → Model → UI`
 
-Son flujos futuros de responsabilidad; no se ha creado cliente HTTP ni se exige crear capas sin necesidad.
+No se debe llamar a una API directamente desde un componente ni colocar lógica compleja en `page.tsx`.
+
+## Estado compartido
+
+`ClinicSessionProvider` mantiene durante la navegación la selección del paciente y las acciones simuladas de agenda. `SettingsProvider` mantiene los cambios simulados de configuración. Esta persistencia termina al recargar la aplicación y no sustituye una base de datos.

@@ -1,19 +1,11 @@
-# Tareas - Integrante 2
+# Tareas — Daniel700392 (Danjo)
 
-## Fuente oficial
+GitHub Issues es la fuente oficial. Este archivo registra el resultado de las tareas asignadas y no sustituye sus criterios de aceptación.
 
-Los GitHub Issues son la fuente oficial de tareas y requerimientos.
+| Issue | Tarea | Rama de trabajo | PR | Estado |
+| --- | --- | --- | --- | --- |
+| #1 | Base, arquitectura, estilos y componentes compartidos | `feature/issue-1-arquitectura` | #14 | Integrado en `develop` |
+| #4 | Agenda y gestión de pacientes | `feature/issue-4-agenda-pacientes` | #15 | Integrado en `develop` |
+| #5 | Usuarios, roles, clínica y auditoría | `feature/issue-5-configuracion` | #16 | Integrado en `develop` |
 
-TASKS.md sirve únicamente como guía o índice.
-
-Antes de implementar una tarea se debe consultar siempre el GitHub Issue correspondiente.
-
-Si existe cualquier diferencia entre TASKS.md y el GitHub Issue, prevalece siempre el contenido actual del GitHub Issue.
-
-## Issues relacionados
-
-Sin referencias verificadas: consulta remota no disponible. Área inicial: Agenda, pacientes y configuración.
-
-## Regla
-
-Consultar el Issue actualizado antes de comenzar. No implementar tareas solamente porque aparezcan aquí. No duplicar criterios de aceptación ni inferir asignaciones.
+Antes de iniciar una tarea nueva se debe consultar su Issue actualizado, crear una rama independiente desde `develop` y respetar `SCOPE.md`.

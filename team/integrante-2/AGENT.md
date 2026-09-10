@@ -9,7 +9,7 @@ Antes de implementar un Issue:
 5. Leer /team/integrante-2/AGENT.md.
 6. Leer /team/integrante-2/SCOPE.md.
 7. Consultar el GitHub Issue solicitado y su asignación actual.
-8. Verificar que el Issue esté dentro de su alcance y que la rama sea feature/integrante-2.
+8. Verificar que el Issue esté dentro de su alcance y trabajar en una rama propia creada desde `develop`, con el patrón `feature/issue-N-descripcion`.
 9. Analizar el código existente.
 10. Mostrar qué archivos necesita crear/modificar y advertir cambios compartidos.
 
