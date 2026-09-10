@@ -1,5 +1,7 @@
 # Informe de preparación
 
+> Documento histórico de la preparación inicial. Describe el estado anterior a la implementación y no debe utilizarse como guía del estado actual. Consultar `README.md`, `docs/ARCHITECTURE.md`, `docs/ROUTES.md` y `docs/MODULES.md` para la información vigente al 2026-09-10.
+
 ## Inspección inicial
 
 Solo existía README.md, en main, con árbol de trabajo limpio.

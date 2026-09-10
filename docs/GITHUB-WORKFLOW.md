@@ -1,21 +1,22 @@
 # Trabajo con GitHub
 
-Los GitHub Issues son la fuente oficial de requerimientos, tickets, descripciones, criterios de aceptación, asignaciones, prioridades y estado.
-TASKS.md solo es un índice; consultar siempre el Issue actualizado. Ante diferencias prevalece GitHub.
+Los GitHub Issues son la fuente oficial de requerimientos, criterios de aceptación, responsables, prioridades y estado. Los archivos `TASKS.md` son únicamente un índice; ante cualquier diferencia prevalece el Issue vigente.
 
-Issue → Rama → Código → Commit → Pull Request → test → main.
+## Recorrido de una tarea
 
-La integración de test a main requiere pruebas de integración y un segundo PR.
-Verificar integrante, rama, asignación y alcance; leer los documentos obligatorios de AGENTS.md; inspeccionar código y mostrar archivos necesarios.
-Informar cambios compartidos y detener cambios en módulos ajenos. Implementar únicamente el Issue.
-Ejecutar lint/build cuando existan, mostrar resultados y esperar instrucciones antes de commit/push/merge.
+`Issue → In progress → rama desde develop → implementación → verificaciones → Pull Request a develop → Ready → revisión → merge`
 
-Relacionar commits/PR con el número real del Issue. Patrón documental: feat(auth): descripción (#N). Sustituir N únicamente por un número verificado.
-La plantilla incluye Closes # para completar con un Issue real. Revisar su efecto de cierre al integrar en la rama predeterminada. Esta preparación no crea PR ni cierra Issues.
+- Relacionar el Pull Request y los commits con el número real del Issue.
+- No trabajar directamente sobre `develop` ni `main`.
+- No mezclar módulos ajenos al alcance del ticket.
+- Ejecutar como mínimo `npm run lint` y `npm run build` antes de solicitar revisión.
+- Documentar los cambios relevantes en los `.md` correspondientes.
+- El estado del tablero no reemplaza el estado técnico del Pull Request.
 
-## Referencias y asignaciones
+## Entregas de Daniel700392
 
-La consulta de solo lectura a GitHub del 2026-09-10 falló por conexión al proxy.
-No se verificaron números de Issues, nombres, usernames ni asignaciones; no se inventan referencias.
-No se puede afirmar si hay discrepancias con la distribución inicial. Quedan pendientes de revisión humana.
-Al recuperar acceso, comparar asignaciones vigentes con SCOPE.md, documentar discrepancias sin modificar GitHub y resolver el alcance antes de implementar. GitHub determina el asignado.
+| Issue | Alcance | Pull Request | Estado |
+| --- | --- | --- | --- |
+| #1 | Arquitectura, estilos, componentes y layout privado | #14 | Integrado en `develop` |
+| #4 | Agenda y gestión de pacientes | #15 | Integrado en `develop` |
+| #5 | Usuarios, roles, clínica y auditoría | #16 | Integrado en `develop` |
