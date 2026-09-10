@@ -1,0 +1,8 @@
+import type { Patient } from "../models/patient";
+
+export const initialPatients: Patient[] = [
+  { id: "p1", code: "PAC-00124", name: "María López García", dpi: "2987 45120 0101", birthDate: "1992-05-14", gender: "Femenino", phone: "5555-0184", email: "maria.lopez@email.com", city: "Guatemala", address: "Zona 11, Ciudad de Guatemala", emergencyContact: "José López · 5555-9901", billingName: "María López García", nit: "548796-2", accessStatus: "Activo", lastVisit: "2026-08-28" },
+  { id: "p2", code: "PAC-00125", name: "Carlos Méndez Ruiz", dpi: "1845 90231 0101", birthDate: "1985-11-02", gender: "Masculino", phone: "5555-2271", email: "carlos.mendez@email.com", city: "Mixco", address: "Zona 4, Mixco", emergencyContact: "Elena Ruiz · 5555-2900", billingName: "Carlos Méndez", nit: "CF", accessStatus: "Activo", lastVisit: "2026-09-02" },
+  { id: "p3", code: "PAC-00126", name: "Ana Lucía Pérez", dpi: "3122 88740 0101", birthDate: "2001-03-21", gender: "Femenino", phone: "5555-4410", email: "ana.perez@email.com", city: "Villa Nueva", address: "Zona 1, Villa Nueva", emergencyContact: "Lucía Pérez · 5555-4411", billingName: "Ana Lucía Pérez", nit: "992344-1", accessStatus: "Pendiente", lastVisit: "Primera cita" },
+  { id: "p4", code: "PAC-00127", name: "Luis Fernando Soto", dpi: "2451 66324 0108", birthDate: "1978-08-09", gender: "Masculino", phone: "5555-7023", email: "luis.soto@email.com", city: "Amatitlán", address: "Barrio San Juan, Amatitlán", emergencyContact: "Marta Soto · 5555-7024", billingName: "Luis Fernando Soto", nit: "770123-8", accessStatus: "Activo", lastVisit: "2026-08-15" },
+];

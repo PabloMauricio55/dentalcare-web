@@ -9,3 +9,4 @@ export * from "./tables/Pagination";
 export * from "./ui/Button";
 export * from "./ui/PageHeader";
 export * from "./ui/StatCard";
+export * from "./feedback/ActionNotice";

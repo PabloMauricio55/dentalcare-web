@@ -9,7 +9,8 @@ import { Sidebar } from "@/shared/navigation/Sidebar";
 export function PrivateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { role, setRole, sidebarOpen, setSidebarOpen } = useApp();
-  const meta = routeTitles[pathname] ?? { title: "DentalCare", subtitle: "Gestión clínica" };
+  const matchedRoute = Object.keys(routeTitles).find((route) => pathname === route || pathname.startsWith(`${route}/`));
+  const meta = matchedRoute ? routeTitles[matchedRoute] : { title: "DentalCare", subtitle: "Gestión clínica" };
 
   return (
     <div className="app-shell">
