@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import type { CreatePlanDto, RegisterChargeDto, RegisterPaymentDto, RequestAdjustmentDto } from "../dtos/billing.dto";
-import type { AccountSummary, Adjustment, AgreementPlan, Charge, Installment, Payment, Receipt } from "../models/billing";
+import type { AccountSummary, Adjustment, AgreementPlan, Charge, Installment, Payment, PaymentMethod, Receipt } from "../models/billing";
 import { initialAdjustments, initialCharges, initialInstallments, initialPayments, initialPlans, initialReceipts, nextReceiptSequence } from "../mocks/billing";
 import { billingService } from "../services/billing.service";
 
@@ -20,6 +20,7 @@ type Value = {
   addCharge: (dto: RegisterChargeDto) => void;
   registerPayment: (dto: RegisterPaymentDto, concept: string) => Receipt;
   createPlan: (dto: CreatePlanDto) => void;
+  payInstallment: (installmentId: string, method: PaymentMethod) => Receipt | undefined;
   requestAdjustment: (dto: RequestAdjustmentDto) => void;
   authorizeAdjustment: (id: string) => void;
   rejectAdjustment: (id: string) => void;
@@ -57,6 +58,17 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createPlan = (dto: CreatePlanDto) => { const created = billingService.createPlan(dto); setPlans((items) => [...items, created.plan]); setInstallments((items) => [...items, ...created.installments]); };
+  const payInstallment = (installmentId: string, method: PaymentMethod) => {
+    const installment = installments.find((item) => item.id === installmentId);
+    const plan = installment ? plans.find((item) => item.id === installment.planId) : undefined;
+    if (!installment || !plan || installment.status === "Pagada") return undefined;
+    const receipt = registerPayment({ patientId: plan.patientId, kind: "Abono", amount: installment.amount, method, chargeId: plan.chargeId }, `Cuota ${installment.number} de ${plan.installmentCount}`);
+    const remaining = installments.filter((item) => item.planId === plan.id && item.id !== installment.id && item.status !== "Pagada").length;
+    setInstallments((items) => items.map((item) => item.id === installmentId ? { ...item, status: "Pagada" } : item));
+    if (!remaining) setPlans((items) => items.map((item) => item.id === plan.id ? { ...item, status: "Completado" } : item));
+    return receipt;
+  };
+
   const requestAdjustment = (dto: RequestAdjustmentDto) => setAdjustments((items) => [...items, billingService.requestAdjustment(dto, operator)]);
 
   const authorizeAdjustment = (id: string) => {
@@ -71,7 +83,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
   const rejectAdjustment = (id: string) => setAdjustments((items) => items.map((item) => item.id === id ? { ...item, status: "Rechazada", authorizedBy: authorizer } : item));
   const sendReceipt = (id: string, email: string) => setReceipts((items) => items.map((item) => item.id === id ? { ...item, sentTo: email } : item));
 
-  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt };
+  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, payInstallment, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt };
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

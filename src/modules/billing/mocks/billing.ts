@@ -16,7 +16,7 @@ export const initialPayments: Payment[] = [
 ];
 
 export const initialPlans: AgreementPlan[] = [
-  { id: "pl1", patientId: "p2", total: 600, downPayment: 0, installmentCount: 3, startDate: "2026-09-05", status: "Vigente" },
+  { id: "pl1", patientId: "p2", chargeId: "cg3", total: 600, downPayment: 0, installmentCount: 3, startDate: "2026-09-05", status: "Vigente" },
 ];
 
 export const initialInstallments: Installment[] = [
