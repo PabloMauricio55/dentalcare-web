@@ -1,2 +1,2 @@
-import { ModulePlaceholder } from "@/shared/components/ui/ModulePlaceholder";
-export default function Page() { return <ModulePlaceholder title="Configuración" description="Usuarios, permisos, clínica y auditoría." issue="ticket #5" />; }
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/configuracion/usuarios"); }
