@@ -1,0 +1,13 @@
+# Pendiente: confirmar usernames reales y permisos de los cuatro integrantes.
+# No hay reglas activas ni usernames inventados.
+# Tras verificarlos, añadir una regla por patrón de cada SCOPE.md,
+# seguida de los propietarios reales.
+# Integrante 1: public-catalog, auth; grupos (public), (auth), (patient).
+# Integrante 2: appointments, patients, settings; agenda, pacientes, configuracion.
+# Integrante 3: medical-history, clinical-records, sterilization, treatments;
+# rutas expediente, esterilizacion y tratamientos.
+# Integrante 4: inventory, billing, reports; inventario, caja y reportes.
+# Los patrones exactos de módulos y rutas están en team/integrante-X/SCOPE.md.
+# Coordinar propietarios de archivos compartidos enumerados en AGENTS.md.
+# Dashboard: responsable pendiente, no asignar por inferencia.
+# CODEOWNERS orienta revisiones; no sustituye asignaciones en Issues ni SCOPE.md.
