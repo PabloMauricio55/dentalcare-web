@@ -1,0 +1,14 @@
+export type PaymentMethod = "Efectivo" | "Tarjeta" | "Transferencia" | "Cheque";
+export type PaymentKind = "Pago" | "Abono" | "Anticipo";
+export type ChargeStatus = "Pendiente" | "Parcial" | "Pagado" | "Anulado";
+export type Charge = { id: string; patientId: string; date: string; concept: string; amount: number; discount: number; paid: number; status: ChargeStatus };
+export type Payment = { id: string; patientId: string; date: string; kind: PaymentKind; amount: number; method: PaymentMethod; chargeId: string; receiptId: string };
+export type PlanStatus = "Vigente" | "Completado" | "Cancelado";
+export type AgreementPlan = { id: string; patientId: string; total: number; downPayment: number; installmentCount: number; startDate: string; status: PlanStatus };
+export type InstallmentStatus = "Pendiente" | "Pagada" | "Vencida";
+export type Installment = { id: string; planId: string; number: number; dueDate: string; amount: number; status: InstallmentStatus };
+export type AdjustmentKind = "Descuento" | "Devolución" | "Anulación";
+export type AdjustmentStatus = "Por autorizar" | "Aplicada" | "Rechazada";
+export type Adjustment = { id: string; kind: AdjustmentKind; patientId: string; originId: string; originLabel: string; date: string; amount: number; reason: string; requestedBy: string; authorizedBy: string; status: AdjustmentStatus };
+export type Receipt = { id: string; number: string; patientId: string; date: string; concept: string; amount: number; method: PaymentMethod; status: "Emitido" | "Anulado"; sentTo: string };
+export type AccountSummary = { charged: number; discounted: number; paid: number; advances: number; balance: number };
