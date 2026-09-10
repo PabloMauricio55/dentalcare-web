@@ -1,2 +1,2 @@
-import { ModulePlaceholder } from "@/shared/components/ui/ModulePlaceholder";
-export default function Page() { return <ModulePlaceholder title="Agenda y pacientes" description="Citas, pacientes y flujo de recepción." issue="ticket #4" />; }
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/agenda/general"); }
