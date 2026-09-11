@@ -1,3 +1,5 @@
-import { redirect } from "next/navigation";
+import { PublicHome } from "@/modules/public-catalog/components/PublicHome";
 
-export default function Home() { redirect("/panel"); }
+export default function Home() {
+  return <PublicHome />;
+}
