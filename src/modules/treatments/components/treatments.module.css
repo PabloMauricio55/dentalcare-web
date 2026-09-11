@@ -562,6 +562,89 @@
   font-size: 10px;
 }
 
+.recordCard {
+  display: grid;
+  gap: 16px;
+}
+
+.recordForm {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.recordForm :global(.full),
+.procedureSummary,
+.recordActions {
+  grid-column: 1 / -1;
+}
+
+.procedureSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.procedureSummary > div {
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.procedureSummary span,
+.procedureSummary strong {
+  display: block;
+}
+
+.procedureSummary span,
+.recordDetail span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.procedureSummary strong {
+  font-size: 12px;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.recordActions {
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 15px;
+}
+
+.recordDetail {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.recordDetail > div {
+  background: #f8fbfb;
+  border-radius: 9px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.recordDetail strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.recordDetailFull {
+  grid-column: 1 / -1;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -725,6 +808,23 @@
   :global(.modal):has(.consentDocument) {
     max-height: calc(100dvh - 24px);
     max-width: calc(100vw - 24px);
+  }
+
+  .recordForm,
+  .procedureSummary,
+  .recordDetail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recordForm :global(.full),
+  .procedureSummary,
+  .recordActions,
+  .recordDetailFull {
+    grid-column: 1;
+  }
+
+  .recordActions > :global(.button) {
+    width: 100%;
   }
 
   .detailProcedures > div {

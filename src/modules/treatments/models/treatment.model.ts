@@ -40,3 +40,19 @@ export type TreatmentConsent = {
   createdAt: string;
   acceptedAt?: string;
 };
+
+export type TreatmentProcedureRecordStatus = "Registrado";
+
+export type TreatmentProcedureRecord = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  procedureId: string;
+  procedureName: string;
+  tooth: string;
+  professional: string;
+  date: string;
+  time: string;
+  notes: string;
+  status: TreatmentProcedureRecordStatus;
+};

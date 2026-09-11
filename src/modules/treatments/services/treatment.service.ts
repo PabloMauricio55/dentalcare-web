@@ -1,5 +1,6 @@
 import type { CreateTreatmentPlanDto } from "@/modules/treatments/dtos/create-treatment-plan.dto";
-import type { TreatmentBudget, TreatmentConsent, TreatmentPlan, TreatmentProcedure } from "@/modules/treatments/models/treatment.model";
+import type { CreateProcedureRecordDto } from "@/modules/treatments/dtos/create-procedure-record.dto";
+import type { TreatmentBudget, TreatmentConsent, TreatmentPlan, TreatmentProcedure, TreatmentProcedureRecord } from "@/modules/treatments/models/treatment.model";
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -35,6 +36,13 @@ export const treatmentService = {
       treatmentPlanId,
       status: "Pendiente",
       createdAt: new Intl.DateTimeFormat("en-CA").format(new Date()),
+    };
+  },
+  createProcedureRecord(dto: CreateProcedureRecordDto): TreatmentProcedureRecord {
+    return {
+      ...dto,
+      id: createId("record"),
+      status: "Registrado",
     };
   },
 };
