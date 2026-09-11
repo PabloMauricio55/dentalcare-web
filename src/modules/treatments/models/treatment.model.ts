@@ -29,3 +29,14 @@ export type TreatmentBudget = {
   createdAt: string;
   approvedAt?: string;
 };
+
+export type TreatmentConsentStatus = "Pendiente" | "Aceptado";
+
+export type TreatmentConsent = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  status: TreatmentConsentStatus;
+  createdAt: string;
+  acceptedAt?: string;
+};

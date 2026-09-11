@@ -1,5 +1,5 @@
-import { PendingTreatmentView } from "@/modules/treatments/components/PendingTreatmentView";
+import { TreatmentConsentView } from "@/modules/treatments/components/TreatmentConsentView";
 
 export default function Page() {
-  return <PendingTreatmentView title="Consentimientos" />;
+  return <TreatmentConsentView />;
 }
