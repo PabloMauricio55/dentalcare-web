@@ -18,3 +18,14 @@ export type TreatmentPlan = {
   status: TreatmentPlanStatus;
   procedures: TreatmentProcedure[];
 };
+
+export type TreatmentBudgetStatus = "Borrador" | "Aprobado";
+
+export type TreatmentBudget = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  status: TreatmentBudgetStatus;
+  createdAt: string;
+  approvedAt?: string;
+};

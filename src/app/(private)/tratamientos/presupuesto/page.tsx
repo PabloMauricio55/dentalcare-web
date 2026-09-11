@@ -1,5 +1,5 @@
-import { PendingTreatmentView } from "@/modules/treatments/components/PendingTreatmentView";
+import { TreatmentBudgetView } from "@/modules/treatments/components/TreatmentBudgetView";
 
 export default function Page() {
-  return <PendingTreatmentView title="Presupuesto" />;
+  return <TreatmentBudgetView />;
 }

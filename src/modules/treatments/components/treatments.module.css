@@ -245,6 +245,119 @@
   margin-top: 4px;
 }
 
+.budgetSelector {
+  align-items: end;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(220px, .8fr) minmax(300px, 1.2fr);
+}
+
+.budgetSelector h3,
+.budgetSelector p {
+  margin: 0;
+}
+
+.budgetSelector h3 {
+  font-size: 17px;
+}
+
+.budgetSelector p {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.budgetError {
+  grid-column: 1 / -1;
+}
+
+.budgetHeader {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.budgetHeader > div:first-child > span,
+.budgetHeader h3,
+.budgetHeader p {
+  display: block;
+  margin: 0;
+}
+
+.budgetHeader > div:first-child > span {
+  color: var(--teal-dark);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.budgetHeader h3 {
+  font-size: 18px;
+  margin-top: 4px;
+}
+
+.budgetHeader p {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.budgetStatuses {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+}
+
+.budgetStatuses > div {
+  display: grid;
+  gap: 5px;
+}
+
+.budgetStatuses small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.notGenerated {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.budgetFooter {
+  align-items: center;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.budgetFooter > div {
+  margin-right: auto;
+}
+
+.budgetFooter span,
+.budgetFooter strong {
+  display: block;
+}
+
+.budgetFooter span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.budgetFooter strong {
+  font-size: 24px;
+  margin-top: 4px;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -291,6 +404,15 @@
     max-width: 100%;
     min-width: 0;
     width: 100%;
+  }
+
+  .budgetSelector {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .budgetError {
+    grid-column: auto;
   }
 
   .procedureEditor {
@@ -354,6 +476,28 @@
   .detailMeta {
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+
+  .budgetHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .budgetStatuses {
+    flex-wrap: wrap;
+  }
+
+  .budgetFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .budgetFooter > div {
+    margin-right: 0;
+  }
+
+  .budgetFooter > :global(.button) {
+    width: 100%;
   }
 
   .detailProcedures > div {
