@@ -1,6 +1,7 @@
 import type { CreateTreatmentPlanDto } from "@/modules/treatments/dtos/create-treatment-plan.dto";
 import type { CreateProcedureRecordDto } from "@/modules/treatments/dtos/create-procedure-record.dto";
-import type { TreatmentBudget, TreatmentConsent, TreatmentPlan, TreatmentProcedure, TreatmentProcedureRecord } from "@/modules/treatments/models/treatment.model";
+import type { FinalizeProcedureDto } from "@/modules/treatments/dtos/finalize-procedure.dto";
+import type { ProcedureCompletion, TreatmentBudget, TreatmentCharge, TreatmentConsent, TreatmentPlan, TreatmentProcedure, TreatmentProcedureRecord } from "@/modules/treatments/models/treatment.model";
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -43,6 +44,29 @@ export const treatmentService = {
       ...dto,
       id: createId("record"),
       status: "Registrado",
+    };
+  },
+  finalizeProcedure(dto: FinalizeProcedureDto): { completion: ProcedureCompletion; charge: TreatmentCharge } {
+    const createdAt = new Intl.DateTimeFormat("en-CA").format(new Date());
+    return {
+      completion: {
+        id: createId("completion"),
+        patientId: dto.patientId,
+        treatmentPlanId: dto.treatmentPlanId,
+        procedureRecordId: dto.procedureRecordId,
+        completedAt: createdAt,
+        materials: dto.materials.map((material) => ({ ...material, id: createId("material") })),
+      },
+      charge: {
+        id: createId("charge"),
+        patientId: dto.patientId,
+        treatmentPlanId: dto.treatmentPlanId,
+        procedureRecordId: dto.procedureRecordId,
+        description: dto.description,
+        amount: dto.amount,
+        status: "Generado",
+        createdAt,
+      },
     };
   },
 };

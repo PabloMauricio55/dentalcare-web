@@ -41,7 +41,7 @@ export type TreatmentConsent = {
   acceptedAt?: string;
 };
 
-export type TreatmentProcedureRecordStatus = "Registrado";
+export type TreatmentProcedureRecordStatus = "Registrado" | "Finalizado";
 
 export type TreatmentProcedureRecord = {
   id: string;
@@ -55,4 +55,32 @@ export type TreatmentProcedureRecord = {
   time: string;
   notes: string;
   status: TreatmentProcedureRecordStatus;
+};
+
+export type ProcedureMaterial = {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  notes: string;
+};
+
+export type ProcedureCompletion = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  procedureRecordId: string;
+  materials: ProcedureMaterial[];
+  completedAt: string;
+};
+
+export type TreatmentCharge = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  procedureRecordId: string;
+  description: string;
+  amount: number;
+  status: "Generado";
+  createdAt: string;
 };

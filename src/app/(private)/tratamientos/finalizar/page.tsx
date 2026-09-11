@@ -1,5 +1,5 @@
-import { PendingTreatmentView } from "@/modules/treatments/components/PendingTreatmentView";
+import { TreatmentFinalizationView } from "@/modules/treatments/components/TreatmentFinalizationView";
 
 export default function Page() {
-  return <PendingTreatmentView title="Finalizar y materiales" />;
+  return <TreatmentFinalizationView />;
 }

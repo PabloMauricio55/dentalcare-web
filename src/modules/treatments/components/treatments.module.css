@@ -645,6 +645,173 @@
   grid-column: 1 / -1;
 }
 
+.finalizationSelectors {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.finalizationCard,
+.materialsForm,
+.completionSection {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.finalizationSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.finalizationSummary > div,
+.materialReadOnly > div {
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.finalizationSummary span,
+.finalizationSummary strong,
+.materialReadOnly strong,
+.materialReadOnly span,
+.materialReadOnly small {
+  display: block;
+}
+
+.finalizationSummary span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.finalizationSummary strong {
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.materialsForm,
+.completionSection {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.materialsHeading {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.materialsHeading h3,
+.materialsHeading p,
+.completionSection h3 {
+  margin: 0;
+}
+
+.materialsHeading h3,
+.completionSection h3 {
+  font-size: 16px;
+}
+
+.materialsHeading p {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.materialRow {
+  align-items: end;
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(80px, .55fr) minmax(100px, .65fr) minmax(0, 1.2fr) 38px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.materialRow > *,
+.materialRow input,
+.materialRow select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.finalizationActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.materialReadOnly {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.materialReadOnly strong {
+  font-size: 13px;
+}
+
+.materialReadOnly span,
+.materialReadOnly small {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.chargeCard {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.chargeCard span,
+.chargeCard h3,
+.chargeCard p,
+.chargeCard strong {
+  display: block;
+  margin: 0;
+}
+
+.chargeCard span {
+  color: var(--teal-dark);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chargeCard h3 {
+  font-size: 17px;
+  margin-top: 4px;
+}
+
+.chargeCard p {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.chargeCard > div:last-child {
+  align-items: flex-end;
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.chargeCard strong {
+  font-size: 22px;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -717,6 +884,14 @@
   .removeButton {
     grid-column: -2 / -1;
     justify-self: end;
+  }
+
+  .materialRow {
+    grid-template-columns: minmax(0, 1.4fr) minmax(80px, .6fr) minmax(100px, .7fr) 38px;
+  }
+
+  .materialRow > :nth-child(4) {
+    grid-column: 1 / -2;
   }
 }
 
@@ -812,8 +987,44 @@
 
   .recordForm,
   .procedureSummary,
-  .recordDetail {
+  .recordDetail,
+  .finalizationSelectors,
+  .finalizationSummary {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .materialsHeading,
+  .chargeCard {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .materialRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .materialRow > :first-child,
+  .materialRow > :nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .materialRow > :last-child {
+    grid-column: 2;
+    justify-self: end;
+    width: 38px;
+  }
+
+  .materialReadOnly {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .finalizationActions > :global(.button) {
+    width: 100%;
+  }
+
+  .chargeCard > div:last-child {
+    align-items: flex-start;
+    justify-items: start;
   }
 
   .recordForm :global(.full),
@@ -904,6 +1115,16 @@
   .procedureEditor {
     grid-template-columns: minmax(0, 1fr);
     padding: 10px;
+  }
+
+  .materialRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .materialRow > :first-child,
+  .materialRow > :nth-child(4),
+  .materialRow > :last-child {
+    grid-column: 1;
   }
 
   .procedureEditor > :first-child,
