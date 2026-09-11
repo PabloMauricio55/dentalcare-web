@@ -1,5 +1,5 @@
-import { PendingTreatmentView } from "@/modules/treatments/components/PendingTreatmentView";
+import { TreatmentPrescriptionView } from "@/modules/treatments/components/TreatmentPrescriptionView";
 
 export default function Page() {
-  return <PendingTreatmentView title="Indicaciones y receta" />;
+  return <TreatmentPrescriptionView />;
 }

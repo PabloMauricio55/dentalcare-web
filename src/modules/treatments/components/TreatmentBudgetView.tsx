@@ -85,6 +85,6 @@ export function TreatmentBudgetView() {
         {selectedBudget?.status === "Borrador" && <Button onClick={() => setApproval(selectedBudget)}>Aprobar presupuesto</Button>}
       </div>
     </section>}
-    <ConfirmDialog open={Boolean(approval)} title="Aprobar presupuesto" message={`¿Confirmas la aprobación del presupuesto ${approval?.id ?? "seleccionado"} asociado al plan “${selectedPlan?.name ?? ""}”?`} confirmLabel="Sí, aprobar presupuesto" onClose={() => setApproval(null)} onConfirm={confirmApproval} />
+    <ConfirmDialog open={Boolean(approval)} title="Aprobar presupuesto" message={`¿Confirmas la aprobación del presupuesto asociado al plan “${selectedPlan?.name ?? "seleccionado"}”?`} confirmLabel="Sí, aprobar presupuesto" onClose={() => setApproval(null)} onConfirm={confirmApproval} />
   </>;
 }

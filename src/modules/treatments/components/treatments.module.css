@@ -812,6 +812,234 @@
   font-size: 22px;
 }
 
+.prescriptionCard,
+.prescriptionForm,
+.instructionsSection,
+.medicationsSection {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.prescriptionSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.prescriptionSummary > div {
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.prescriptionSummary span,
+.prescriptionSummary strong {
+  display: block;
+}
+
+.prescriptionSummary span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.prescriptionSummary strong {
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.instructionsSection,
+.medicationsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.instructionsSection h3,
+.instructionsSection p {
+  margin: 0;
+}
+
+.instructionsSection h3,
+.medicationsSection h3 {
+  font-size: 16px;
+}
+
+.instructionsSection p {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.instructionsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.instructionsGrid :global(.full) {
+  grid-column: 1 / -1;
+}
+
+.medicationCard {
+  align-items: end;
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, .8fr)) minmax(0, 1fr) 38px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.medicationCard > *,
+.medicationCard input {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.prescriptionActions {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+:global(.modal):has(.prescriptionDocument) {
+  max-width: min(760px, calc(100vw - 36px));
+  overflow-x: hidden;
+}
+
+.prescriptionDocument {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.prescriptionDocument header {
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 7px;
+  padding-bottom: 16px;
+}
+
+.prescriptionDocument header small {
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.prescriptionDocument header h3 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.prescriptionDocument header :global(.status-badge) {
+  justify-self: start;
+}
+
+.prescriptionDocumentInfo {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.prescriptionDocumentInfo > div {
+  background: #f8fbfb;
+  border-radius: 9px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.prescriptionDocumentInfo span,
+.prescriptionDocumentInfo strong,
+.prescriptionDocumentInfo small {
+  display: block;
+}
+
+.prescriptionDocumentInfo span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.prescriptionDocumentInfo strong {
+  font-size: 12px;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.prescriptionDocumentInfo small {
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.prescriptionDocument section h4 {
+  font-size: 13px;
+  margin: 0 0 9px;
+}
+
+.prescriptionDocument ol {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.prescriptionDocument li {
+  padding-left: 4px;
+}
+
+.prescriptionDocument li strong,
+.prescriptionDocument li span,
+.prescriptionDocument li small {
+  display: block;
+}
+
+.prescriptionDocument li strong {
+  font-size: 12px;
+}
+
+.prescriptionDocument li span,
+.prescriptionDocument li small,
+.previewInstructions p {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.previewInstructions {
+  display: grid;
+  gap: 6px;
+}
+
+.previewInstructions p {
+  margin: 0;
+}
+
+.prescriptionDocument footer {
+  background: #f8fbfb;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 11px;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -892,6 +1120,25 @@
 
   .materialRow > :nth-child(4) {
     grid-column: 1 / -2;
+  }
+
+  .prescriptionSummary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .medicationCard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .medicationCard > :first-child,
+  .medicationCard > :nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  .medicationCard > :last-child {
+    grid-column: 2;
+    justify-self: end;
+    width: 38px;
   }
 }
 
@@ -991,6 +1238,30 @@
   .finalizationSelectors,
   .finalizationSummary {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prescriptionSummary,
+  .instructionsGrid,
+  .prescriptionDocumentInfo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .instructionsGrid :global(.full) {
+    grid-column: 1;
+  }
+
+  .prescriptionActions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prescriptionActions > :global(.button) {
+    width: 100%;
+  }
+
+  :global(.modal):has(.prescriptionDocument) {
+    max-height: calc(100dvh - 24px);
+    max-width: calc(100vw - 24px);
   }
 
   .materialsHeading,
@@ -1119,6 +1390,16 @@
 
   .materialRow {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .medicationCard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .medicationCard > :first-child,
+  .medicationCard > :nth-child(5),
+  .medicationCard > :last-child {
+    grid-column: 1;
   }
 
   .materialRow > :first-child,

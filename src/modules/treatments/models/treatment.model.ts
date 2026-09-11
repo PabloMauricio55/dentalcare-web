@@ -84,3 +84,32 @@ export type TreatmentCharge = {
   status: "Generado";
   createdAt: string;
 };
+
+export type PrescriptionMedication = {
+  id: string;
+  name: string;
+  dose: string;
+  frequency: string;
+  duration: string;
+  notes: string;
+};
+
+export type PatientInstructions = {
+  generalCare: string;
+  recommendations: string;
+  restrictions: string;
+  nextControl: string;
+  observations: string;
+};
+
+export type TreatmentPrescription = {
+  id: string;
+  patientId: string;
+  treatmentPlanId: string;
+  procedureRecordId: string;
+  professional: string;
+  date: string;
+  instructions: PatientInstructions;
+  medications: PrescriptionMedication[];
+  status: "Registrada";
+};

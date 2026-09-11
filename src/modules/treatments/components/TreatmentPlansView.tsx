@@ -88,7 +88,7 @@ export function TreatmentPlansView() {
     setApproval(null);
   };
   const columns: Column<TreatmentPlan>[] = [
-    { key: "plan", header: "Plan", cell: (row) => <div className="cell-stack"><strong>{row.name}</strong><small>{row.id} · {row.date}</small></div> },
+    { key: "plan", header: "Plan", cell: (row) => <div className="cell-stack"><strong>{row.name}</strong><small>{row.date}</small></div> },
     { key: "professional", header: "Profesional", cell: (row) => row.professional },
     { key: "procedures", header: "Procedimientos", cell: (row) => row.procedures.length },
     { key: "total", header: "Total", cell: (row) => <strong>{formatCurrency(treatmentService.planTotal(row.procedures))}</strong> },

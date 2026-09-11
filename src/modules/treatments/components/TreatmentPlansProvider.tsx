@@ -4,11 +4,12 @@ import { createContext, useContext, useState } from "react";
 import type { CreateTreatmentPlanDto } from "@/modules/treatments/dtos/create-treatment-plan.dto";
 import type { CreateProcedureRecordDto } from "@/modules/treatments/dtos/create-procedure-record.dto";
 import type { FinalizeProcedureDto } from "@/modules/treatments/dtos/finalize-procedure.dto";
+import type { CreateTreatmentPrescriptionDto } from "@/modules/treatments/dtos/create-treatment-prescription.dto";
 import { initialTreatmentBudgets } from "@/modules/treatments/mocks/treatment-budgets";
 import { initialTreatmentConsents } from "@/modules/treatments/mocks/treatment-consents";
 import { initialTreatmentPlans } from "@/modules/treatments/mocks/treatment-plans";
 import { initialTreatmentProcedureRecords } from "@/modules/treatments/mocks/treatment-procedure-records";
-import type { ProcedureCompletion, TreatmentBudget, TreatmentCharge, TreatmentConsent, TreatmentPlan, TreatmentProcedureRecord } from "@/modules/treatments/models/treatment.model";
+import type { ProcedureCompletion, TreatmentBudget, TreatmentCharge, TreatmentConsent, TreatmentPlan, TreatmentPrescription, TreatmentProcedureRecord } from "@/modules/treatments/models/treatment.model";
 import { treatmentService } from "@/modules/treatments/services/treatment.service";
 
 type TreatmentPlansContextValue = {
@@ -18,6 +19,7 @@ type TreatmentPlansContextValue = {
   procedureRecords: TreatmentProcedureRecord[];
   procedureCompletions: ProcedureCompletion[];
   treatmentCharges: TreatmentCharge[];
+  prescriptions: TreatmentPrescription[];
   addPlan: (dto: CreateTreatmentPlanDto) => TreatmentPlan;
   approvePlan: (id: string) => void;
   generateBudget: (patientId: string, treatmentPlanId: string) => TreatmentBudget;
@@ -26,6 +28,7 @@ type TreatmentPlansContextValue = {
   acceptConsent: (id: string) => void;
   addProcedureRecord: (dto: CreateProcedureRecordDto) => TreatmentProcedureRecord;
   finalizeProcedure: (dto: FinalizeProcedureDto) => { completion: ProcedureCompletion; charge: TreatmentCharge };
+  savePrescription: (dto: CreateTreatmentPrescriptionDto) => TreatmentPrescription;
 };
 
 const TreatmentPlansContext = createContext<TreatmentPlansContextValue | null>(null);
@@ -37,6 +40,7 @@ export function TreatmentPlansProvider({ children }: { children: React.ReactNode
   const [procedureRecords, setProcedureRecords] = useState(initialTreatmentProcedureRecords);
   const [procedureCompletions, setProcedureCompletions] = useState<ProcedureCompletion[]>([]);
   const [treatmentCharges, setTreatmentCharges] = useState<TreatmentCharge[]>([]);
+  const [prescriptions, setPrescriptions] = useState<TreatmentPrescription[]>([]);
   const addPlan = (dto: CreateTreatmentPlanDto) => {
     const plan = treatmentService.create(dto);
     setPlans((current) => [plan, ...current]);
@@ -82,7 +86,13 @@ export function TreatmentPlansProvider({ children }: { children: React.ReactNode
     setTreatmentCharges((current) => current.some((item) => item.procedureRecordId === dto.procedureRecordId) ? current : [result.charge, ...current]);
     return result;
   };
-  return <TreatmentPlansContext.Provider value={{ plans, budgets, consents, procedureRecords, procedureCompletions, treatmentCharges, addPlan, approvePlan, generateBudget, approveBudget, ensureConsent, acceptConsent, addProcedureRecord, finalizeProcedure }}>{children}</TreatmentPlansContext.Provider>;
+  const savePrescription = (dto: CreateTreatmentPrescriptionDto) => {
+    const existing = prescriptions.find((prescription) => prescription.procedureRecordId === dto.procedureRecordId);
+    const prescription = treatmentService.createPrescription(dto, existing?.id);
+    setPrescriptions((current) => existing ? current.map((item) => item.id === existing.id ? prescription : item) : [prescription, ...current]);
+    return prescription;
+  };
+  return <TreatmentPlansContext.Provider value={{ plans, budgets, consents, procedureRecords, procedureCompletions, treatmentCharges, prescriptions, addPlan, approvePlan, generateBudget, approveBudget, ensureConsent, acceptConsent, addProcedureRecord, finalizeProcedure, savePrescription }}>{children}</TreatmentPlansContext.Provider>;
 }
 
 export function useTreatmentPlans() {
