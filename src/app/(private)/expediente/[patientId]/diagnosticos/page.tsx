@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { DiagnosesView } from "@/modules/clinical-records/components/DiagnosesView";
 
 export default function DiagnosticosPage() {
-  return <SectionUnderConstruction label="Diagnósticos" />;
+  return <DiagnosesView />;
 }

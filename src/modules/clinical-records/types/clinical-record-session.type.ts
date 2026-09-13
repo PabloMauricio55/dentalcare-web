@@ -20,19 +20,22 @@ export type ClinicalRecordFeedback = {
 export type ClinicalRecordValidation = 'idle' | 'valid' | 'error';
 
 export type Antecedents = {
-  medical: string;
-  dental: string;
-  family: string;
+  allergies: string;
+  systemicDiseases: string;
+  currentMedication: string;
+  relevantHabits: string;
 };
 
 export type Preparation = {
-  instructions: string;
-  status: 'pending' | 'ready';
+  consentSigned: boolean;
+  instrumentsVerified: boolean;
+  notes: string;
 };
 
 export type Evolution = {
-  summary: string;
-  nextAppointment: string;
+  note: string;
+  consultationDate: string;
+  procedure: string;
 };
 
 export type ToothStatus = 'healthy' | 'carious' | 'missing' | 'treated';
@@ -43,7 +46,9 @@ export type Odontogram = {
 };
 
 export type Diagnoses = {
-  items: string[];
+  primary: string;
+  secondary: string;
+  treatmentPlan: string;
 };
 
 export type ClinicalFile = {

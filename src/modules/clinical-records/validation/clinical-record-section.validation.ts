@@ -39,22 +39,36 @@ export function validateAttentionSection(
 export function validateAntecedents(
   data: Antecedents,
 ): ClinicalRecordValidationResult {
-  void data;
-  return validResult('Los antecedentes se guardaron correctamente (simulación).');
+  return {
+    valid: Boolean(
+      data.allergies.trim() &&
+      data.systemicDiseases.trim() &&
+      data.currentMedication.trim() &&
+      data.relevantHabits.trim(),
+    ),
+    errorMessage: 'Completa todos los campos de antecedentes.',
+    successMessage: 'Los antecedentes se guardaron correctamente (simulación).',
+  };
 }
 
 export function validatePreparation(
   data: Preparation,
 ): ClinicalRecordValidationResult {
-  void data;
-  return validResult('La preparación se guardó correctamente (simulación).');
+  return {
+    valid: data.consentSigned && data.instrumentsVerified && data.notes.trim().length > 0,
+    errorMessage: 'Completa el consentimiento, la verificación del instrumental y las notas.',
+    successMessage: 'La preparación se guardó correctamente (simulación).',
+  };
 }
 
 export function validateEvolution(
   data: Evolution,
 ): ClinicalRecordValidationResult {
-  void data;
-  return validResult('La evolución se guardó correctamente (simulación).');
+  return {
+    valid: Boolean(data.consultationDate && data.procedure.trim() && data.note.trim()),
+    errorMessage: 'Completa la fecha, el procedimiento y la nota de evolución.',
+    successMessage: 'La evolución se guardó correctamente (simulación).',
+  };
 }
 
 export function validateOdontogram(
@@ -67,8 +81,11 @@ export function validateOdontogram(
 export function validateDiagnoses(
   data: Diagnoses,
 ): ClinicalRecordValidationResult {
-  void data;
-  return validResult('Los diagnósticos se guardaron correctamente (simulación).');
+  return {
+    valid: data.primary.trim().length > 0 && data.treatmentPlan.trim().length > 0,
+    errorMessage: 'Completa el diagnóstico principal y el plan de tratamiento.',
+    successMessage: 'Los diagnósticos se guardaron correctamente (simulación).',
+  };
 }
 
 export function validateFiles(data: Files): ClinicalRecordValidationResult {

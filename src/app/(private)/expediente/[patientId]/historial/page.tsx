@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { HistoryView } from "@/modules/clinical-records/components/HistoryView";
 
 export default function HistorialPage() {
-  return <SectionUnderConstruction label="Historial y trazabilidad" />;
+  return <HistoryView />;
 }

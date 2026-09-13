@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { AntecedentsView } from "@/modules/clinical-records/components/AntecedentsView";
 
 export default function AntecedentesPage() {
-  return <SectionUnderConstruction label="Antecedentes" />;
+  return <AntecedentsView />;
 }

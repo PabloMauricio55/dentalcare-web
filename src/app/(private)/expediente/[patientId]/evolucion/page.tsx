@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { EvolutionView } from "@/modules/clinical-records/components/EvolutionView";
 
 export default function EvolucionPage() {
-  return <SectionUnderConstruction label="Consultas y evolución" />;
+  return <EvolutionView />;
 }

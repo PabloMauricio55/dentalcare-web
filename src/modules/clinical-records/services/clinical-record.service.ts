@@ -45,19 +45,22 @@ export function getMockCurrentAttention(): CurrentAttention {
 }
 
 const defaultAntecedents: Antecedents = {
-  medical: 'Sin antecedentes médicos relevantes registrados.',
-  dental: 'Limpieza dental hace seis meses.',
-  family: 'Sin antecedentes familiares registrados.',
+  allergies: 'Penicilina',
+  systemicDiseases: 'Sin enfermedades sistémicas relevantes registradas.',
+  currentMedication: 'Ninguna medicación actual registrada.',
+  relevantHabits: 'No refiere tabaquismo.',
 };
 
 const defaultPreparation: Preparation = {
-  instructions: 'Confirmar actualización de datos antes de la consulta.',
-  status: 'pending',
+  consentSigned: false,
+  instrumentsVerified: false,
+  notes: 'Confirmar actualización de datos antes de la consulta.',
 };
 
 const defaultEvolution: Evolution = {
-  summary: 'Sin evoluciones adicionales en esta sesión.',
-  nextAppointment: 'Por definir',
+  note: 'Paciente tolera adecuadamente la atención simulada.',
+  consultationDate: '2026-09-10',
+  procedure: 'Evaluación odontológica inicial',
 };
 
 const defaultOdontogram: Odontogram = {
@@ -66,7 +69,9 @@ const defaultOdontogram: Odontogram = {
 };
 
 const defaultDiagnoses: Diagnoses = {
-  items: [],
+  primary: 'Sensibilidad dental localizada',
+  secondary: '',
+  treatmentPlan: 'Revisión clínica y seguimiento preventivo.',
 };
 
 const defaultFiles: Files = {
@@ -74,7 +79,20 @@ const defaultFiles: Files = {
 };
 
 const defaultHistory: History = {
-  entries: [],
+  entries: [
+    {
+      id: 'history-001',
+      action: 'Atención registrada',
+      timestamp: '2026-09-10T09:30:00',
+      author: 'Dra. Valeria Soto',
+    },
+    {
+      id: 'history-002',
+      action: 'Antecedentes actualizados',
+      timestamp: '2026-09-11T14:15:00',
+      author: 'Dr. Mateo Ruiz',
+    },
+  ],
 };
 
 export function getMockClinicalRecordSections(): ClinicalRecordSections {
@@ -84,7 +102,7 @@ export function getMockClinicalRecordSections(): ClinicalRecordSections {
     preparacion: { ...defaultPreparation },
     evolucion: { ...defaultEvolution },
     odontograma: { ...defaultOdontogram, teeth: { ...defaultOdontogram.teeth } },
-    diagnosticos: { ...defaultDiagnoses, items: [...defaultDiagnoses.items] },
+    diagnosticos: { ...defaultDiagnoses },
     archivos: { ...defaultFiles, items: [...defaultFiles.items] },
     historial: { ...defaultHistory, entries: [...defaultHistory.entries] },
   };
