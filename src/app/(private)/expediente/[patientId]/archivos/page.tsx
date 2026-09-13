@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { FilesView } from "@/modules/clinical-records/components/FilesView";
 
 export default function ArchivosPage() {
-  return <SectionUnderConstruction label="Archivos" />;
+  return <FilesView />;
 }

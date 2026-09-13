@@ -1,5 +1,5 @@
-import { SectionUnderConstruction } from "@/modules/clinical-records/components/SectionUnderConstruction";
+import { OdontogramView } from "@/modules/clinical-records/components/OdontogramView";
 
 export default function OdontogramaPage() {
-  return <SectionUnderConstruction label="Odontograma" />;
+  return <OdontogramView />;
 }

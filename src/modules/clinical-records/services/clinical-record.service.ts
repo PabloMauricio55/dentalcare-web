@@ -63,9 +63,42 @@ const defaultEvolution: Evolution = {
   procedure: 'Evaluación odontológica inicial',
 };
 
+function createHealthyTeeth(numbers: string[]): Record<string, 'healthy'> {
+  return numbers.reduce<Record<string, 'healthy'>>(
+    (teeth, number) => ({ ...teeth, [number]: 'healthy' }),
+    {},
+  );
+}
+
 const defaultOdontogram: Odontogram = {
   dentition: 'adult',
-  teeth: {},
+  teethByDentition: {
+    adult: {
+      ...createHealthyTeeth([
+        '11', '12', '13', '14', '15', '16', '17', '18',
+        '21', '22', '23', '24', '25', '26', '27', '28',
+        '31', '32', '33', '34', '35', '36', '37', '38',
+        '41', '42', '43', '44', '45', '46', '47', '48',
+      ]),
+      '16': 'carious',
+      '24': 'treated',
+      '37': 'missing',
+    },
+    mixed: {
+      ...Object.fromEntries(
+        ['11', '12', '16', '21', '22', '26', '31', '32', '36', '41', '42', '46']
+          .map((tooth) => [tooth, 'healthy' as const]),
+      ),
+      '16': 'to-treat',
+    },
+    child: {
+      ...Object.fromEntries(
+        ['51', '52', '53', '54', '55', '61', '62', '63', '64', '65', '71', '72', '73', '74', '75', '81', '82', '83', '84', '85']
+          .map((tooth) => [tooth, 'healthy' as const]),
+      ),
+      '54': 'treated',
+    },
+  },
 };
 
 const defaultDiagnoses: Diagnoses = {
@@ -75,7 +108,29 @@ const defaultDiagnoses: Diagnoses = {
 };
 
 const defaultFiles: Files = {
-  items: [],
+  items: [
+    {
+      id: 'file-001',
+      name: 'Radiografía panorámica.jpg',
+      type: 'Imagen',
+      date: '2026-09-10',
+      status: 'uploaded',
+    },
+    {
+      id: 'file-002',
+      name: 'Consentimiento firmado.pdf',
+      type: 'Documento',
+      date: '2026-09-10',
+      status: 'uploaded',
+    },
+    {
+      id: 'file-003',
+      name: 'Fotografía clínica frontal.png',
+      type: 'Imagen',
+      date: '2026-09-11',
+      status: 'uploaded',
+    },
+  ],
 };
 
 const defaultHistory: History = {
@@ -101,7 +156,14 @@ export function getMockClinicalRecordSections(): ClinicalRecordSections {
     antecedentes: { ...defaultAntecedents },
     preparacion: { ...defaultPreparation },
     evolucion: { ...defaultEvolution },
-    odontograma: { ...defaultOdontogram, teeth: { ...defaultOdontogram.teeth } },
+    odontograma: {
+      ...defaultOdontogram,
+      teethByDentition: {
+        adult: { ...defaultOdontogram.teethByDentition.adult },
+        mixed: { ...defaultOdontogram.teethByDentition.mixed },
+        child: { ...defaultOdontogram.teethByDentition.child },
+      },
+    },
     diagnosticos: { ...defaultDiagnoses },
     archivos: { ...defaultFiles, items: [...defaultFiles.items] },
     historial: { ...defaultHistory, entries: [...defaultHistory.entries] },

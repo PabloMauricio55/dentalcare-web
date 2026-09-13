@@ -38,11 +38,13 @@ export type Evolution = {
   procedure: string;
 };
 
-export type ToothStatus = 'healthy' | 'carious' | 'missing' | 'treated';
+export type ToothStatus = 'healthy' | 'carious' | 'missing' | 'treated' | 'to-treat';
+
+export type DentitionType = 'adult' | 'mixed' | 'child';
 
 export type Odontogram = {
-  dentition: 'adult' | 'mixed' | 'child';
-  teeth: Record<string, ToothStatus>;
+  dentition: DentitionType;
+  teethByDentition: Record<DentitionType, Record<string, ToothStatus>>;
 };
 
 export type Diagnoses = {
@@ -55,6 +57,8 @@ export type ClinicalFile = {
   id: string;
   name: string;
   type: string;
+  date: string;
+  status: 'uploaded' | 'error';
 };
 
 export type Files = {
