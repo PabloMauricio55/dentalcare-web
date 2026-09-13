@@ -3,14 +3,19 @@
 import { useState, type ReactNode } from 'react';
 import { ClinicalRecordContext } from '@/modules/clinical-records/hooks/useClinicalRecord';
 import {
-  getMockCurrentAttention,
+  getMockClinicalRecordSections,
   getMockPatient,
 } from '@/modules/clinical-records/services/clinical-record.service';
 import type {
   ClinicalRecordFeedback,
+  ClinicalRecordSectionData,
+  ClinicalRecordSectionKey,
+  ClinicalRecordSections,
   CurrentAttention,
 } from '@/modules/clinical-records/types/clinical-record-session.type';
-import { validateCurrentAttention } from '@/modules/clinical-records/validation/current-attention.schema';
+import {
+  sectionValidators,
+} from '@/modules/clinical-records/validation/clinical-record-section.validation';
 
 type ClinicalRecordProviderProps = {
   patientId: string;
@@ -21,37 +26,82 @@ export function ClinicalRecordProvider({
   patientId,
   children,
 }: ClinicalRecordProviderProps) {
-  const [attention, setAttention] = useState<CurrentAttention>(
-    getMockCurrentAttention,
+  const [sections, setSections] = useState<ClinicalRecordSections>(
+    getMockClinicalRecordSections,
   );
-  const [feedback, setFeedback] = useState<ClinicalRecordFeedback | null>(null);
   const patient = getMockPatient(patientId);
 
-  function updateAttention(changes: Partial<CurrentAttention>) {
-    setAttention((currentAttention) => ({ ...currentAttention, ...changes }));
-    setFeedback(null);
+  function updateSection<Key extends ClinicalRecordSectionKey>(
+    key: Key,
+    changes: Partial<ClinicalRecordSectionData[Key]>,
+  ) {
+    setSections((currentSections) => ({
+      ...currentSections,
+      [key]: {
+        ...currentSections[key],
+        data: { ...currentSections[key].data, ...changes },
+        validation: 'idle',
+        feedback: null,
+      },
+    }));
   }
 
-  function saveAttention() {
-    const errors = validateCurrentAttention(attention);
+  function saveSection<Key extends ClinicalRecordSectionKey>(key: Key) {
+    setSections((currentSections) => {
+      const section = currentSections[key];
+      const result = sectionValidators[key](section.data);
 
-    if (Object.keys(errors).length > 0) {
-      setFeedback({
-        type: 'error',
-        message: 'Revisa los campos obligatorios antes de guardar.',
-      });
-      return;
-    }
+      if (!result.valid) {
+        return {
+          ...currentSections,
+          [key]: {
+            ...section,
+            validation: 'error',
+            feedback: {
+              type: 'error',
+              message: result.errorMessage,
+            },
+          },
+        };
+      }
 
-    setFeedback({
-      type: 'success',
-      message: 'La atención actual se guardó correctamente (simulación).',
+      return {
+        ...currentSections,
+        [key]: {
+          ...section,
+          validation: 'valid',
+          feedback: {
+            type: 'success',
+            message: result.successMessage,
+          },
+        },
+      };
     });
   }
 
+  function updateAttention(changes: Partial<CurrentAttention>) {
+    updateSection('attention', changes);
+  }
+
+  function saveAttention() {
+    saveSection('attention');
+  }
+
+  const attention = sections.attention.data;
+  const feedback: ClinicalRecordFeedback | null = sections.attention.feedback;
+
   return (
     <ClinicalRecordContext.Provider
-      value={{ patient, attention, feedback, updateAttention, saveAttention }}
+      value={{
+        patient,
+        sections,
+        updateSection,
+        saveSection,
+        attention,
+        feedback,
+        updateAttention,
+        saveAttention,
+      }}
     >
       {children}
     </ClinicalRecordContext.Provider>
