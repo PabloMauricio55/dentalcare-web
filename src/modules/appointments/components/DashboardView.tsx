@@ -1,0 +1,13 @@
+"use client";
+
+import { CalendarCheck, Clock3, UserRoundCheck, UsersRound } from "lucide-react";
+import Link from "next/link";
+import { PageHeader, StatCard, StatusBadge } from "@/shared/components";
+import { useClinicSession } from "./ClinicSessionProvider";
+
+export function DashboardView() {
+  const { appointments, patients } = useClinicSession();
+  const today = appointments.filter((item) => item.date === "2026-09-10" && item.status !== "Solicitada");
+  const nameOf = (id: string) => patients.find((patient) => patient.id === id)?.name ?? "Paciente";
+  return <div className="page-stack"><PageHeader title="Buenos días, Daniel" description="Estas son las tareas prioritarias de la clínica para hoy, 10 de septiembre." /><div className="stats-grid"><StatCard label="Citas de hoy" value={today.length} helper={`${today.filter((item) => item.status === "Confirmada").length} por recibir`} icon={CalendarCheck} /><StatCard label="En sala de espera" value={today.filter((item) => item.status === "En espera").length} helper="Abrir flujo de recepción" icon={Clock3} tone="amber" /><StatCard label="En atención" value={today.filter((item) => item.status === "En atención").length} helper="Consulta clínica activa" icon={UserRoundCheck} tone="green" /><StatCard label="Pacientes registrados" value={patients.length} helper={`${patients.filter((item) => item.accessStatus === "Pendiente").length} accesos pendientes`} icon={UsersRound} tone="blue" /></div><div className="dashboard-columns"><section className="card"><div className="card-heading"><div><h3>Próximas atenciones</h3><p>Agenda inmediata de la sede central</p></div><Link className="button button-secondary" href="/agenda/general">Ver agenda</Link></div><div className="schedule-list">{today.slice(0,4).map((item) => <article key={item.id}><time>{item.time}</time><span className="patient-avatar">{nameOf(item.patientId).split(" ").slice(0,2).map((part) => part[0]).join("")}</span><div><strong>{nameOf(item.patientId)}</strong><small>{item.reason}</small></div><StatusBadge status={item.status} /></article>)}</div></section><aside className="card priority-list"><div className="card-heading"><div><h3>Requiere atención</h3><p>Acciones pendientes</p></div></div><Link href="/agenda/solicitudes"><strong>{appointments.filter((item) => item.status === "Solicitada").length}</strong><span>Solicitudes por revisar</span></Link><Link href="/agenda/sala-espera"><strong>{today.filter((item) => item.status === "En espera").length}</strong><span>Paciente en sala de espera</span></Link><Link href="/agenda/pacientes"><strong>{patients.filter((item) => item.accessStatus === "Pendiente").length}</strong><span>Acceso de paciente pendiente</span></Link></aside></div></div>;
+}

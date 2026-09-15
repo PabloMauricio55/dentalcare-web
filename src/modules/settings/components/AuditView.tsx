@@ -1,0 +1,12 @@
+"use client";
+
+import { Download, LockKeyhole, ShieldAlert } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ActionNotice, Button, DataTable, PageHeader, SearchInput, StatCard, type Column } from "@/shared/components";
+import type { AuditEntry } from "../models/settings";
+import { useSettings } from "./SettingsProvider";
+
+export function AuditView(){
+  const{audit}=useSettings();const[query,setQuery]=useState("");const[notice,setNotice]=useState("");const rows=useMemo(()=>audit.filter((item)=>Object.values(item).join(" ").toLowerCase().includes(query.toLowerCase())),[audit,query]);const columns:Column<AuditEntry>[]=[{key:"date",header:"Fecha y hora",cell:(row)=><strong>{row.date}</strong>},{key:"user",header:"Usuario",cell:(row)=>row.user},{key:"action",header:"Acción",cell:(row)=><span className="audit-action">{row.action}</span>},{key:"detail",header:"Detalle",cell:(row)=><div className="cell-stack"><span>{row.detail}</span><small>{row.module}</small></div>},{key:"origin",header:"Origen",cell:(row)=>row.origin}];
+  return <><PageHeader title="Seguridad y auditoría" description="Registro verificable de accesos, cambios y operaciones sensibles." actions={<Button variant="secondary" onClick={()=>setNotice("Archivo CSV de auditoría preparado para exportación.")}><Download size={17}/> Exportar registro</Button>}/>{notice&&<ActionNotice message={notice} onClose={()=>setNotice("")}/>}<div className="stats-grid"><StatCard label="Sesiones activas" value="7" helper="5 usuarios del personal" icon={LockKeyhole}/><StatCard label="Intentos bloqueados" value="1" helper="Últimas 24 horas" icon={ShieldAlert} tone="amber"/></div><section className="card security-settings"><div><h3>Política de acceso del prototipo</h3><p>Contraseña temporal, cambio obligatorio al primer ingreso y bloqueo simulado después de cinco intentos fallidos.</p></div><div className="policy-grid"><label><span>Duración de sesión</span><select><option>8 horas</option><option>4 horas</option><option>12 horas</option></select></label><label><span>Intentos antes de bloqueo</span><select><option>5 intentos</option><option>3 intentos</option></select></label></div></section><section className="card patient-search-card"><SearchInput value={query} onChange={setQuery} placeholder="Buscar por usuario, acción, módulo, detalle o IP..."/><span>{rows.length} eventos</span></section><section className="card"><DataTable columns={columns} rows={rows}/></section></>;
+}

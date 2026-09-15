@@ -1,18 +1,30 @@
 # Estrategia de ramas
 
-| Rama prevista | Uso |
+El equipo trabaja con una rama por ticket creada desde `develop`.
+
+| Rama | Uso |
 | --- | --- |
-| main | Código estable; no desarrollar directamente |
-| test | Integración; recibe PR de ramas individuales |
-| feature/integrante-1 | Trabajo individual del integrante 1 |
-| feature/integrante-2 | Trabajo individual del integrante 2 |
-| feature/integrante-3 | Trabajo individual del integrante 3 |
-| feature/integrante-4 | Trabajo individual del integrante 4 |
+| `main` | Versión estable; no desarrollar directamente |
+| `develop` | Integración del trabajo aprobado |
+| `feature/issue-N-descripcion` | Implementación de un Issue |
+| `docs/descripcion` | Actualización documental coordinada |
 
-GitHub Issue → Asignación → feature/integrante-X → Implementación → Pull Request → test → Pruebas de integración → Pull Request → main.
+## Flujo
 
-No permitir feature/integrante-X → main como flujo normal. Los cambios entran mediante Pull Request.
-Verificar la rama antes de implementar; si no corresponde, informar y coordinar antes de editar.
-El equipo creará/controlará las ramas posteriormente. Esta tarea no crea ni cambia ramas.
-El repositorio se recibió en main; la preparación documental conserva esa rama por instrucción expresa. No autoriza desarrollo futuro directo en main.
-Son acuerdos documentados; no se han configurado protecciones remotas.
+1. Confirmar el Issue, el responsable y el alcance.
+2. Cambiar a `develop` y actualizarla.
+3. Crear una rama exclusiva para el ticket.
+4. Implementar y ejecutar las verificaciones requeridas.
+5. Publicar la rama y abrir un Pull Request hacia `develop`.
+6. Mover el ticket a `Ready` cuando esté listo para revisión.
+7. El Scrum Master revisa y autoriza la integración.
+
+Ejemplo:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/issue-4-agenda-pacientes
+```
+
+No mezclar varios tickets en una rama ni enviar cambios directamente a `develop` o `main`. Las actualizaciones de documentación común también deben pasar por revisión cuando puedan generar conflictos.
