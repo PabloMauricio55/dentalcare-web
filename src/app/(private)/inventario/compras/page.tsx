@@ -1,5 +1,5 @@
-import { PendingInventoryView } from "@/modules/inventory/components/PendingInventoryView";
+import { PurchasesView } from "@/modules/inventory/components/PurchasesView";
 
 export default function Page() {
-  return <PendingInventoryView section="Compras y proveedores" />;
+  return <PurchasesView />;
 }
