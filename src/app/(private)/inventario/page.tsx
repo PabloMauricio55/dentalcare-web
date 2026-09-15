@@ -1,5 +1,5 @@
-import { PendingInventoryView } from "@/modules/inventory/components/PendingInventoryView";
+import { InventoryOverviewView } from "@/modules/inventory/components/InventoryOverviewView";
 
 export default function Page() {
-  return <PendingInventoryView section="Resumen" />;
+  return <InventoryOverviewView />;
 }

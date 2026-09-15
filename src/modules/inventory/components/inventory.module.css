@@ -362,6 +362,174 @@
   grid-column: 1 / -1;
 }
 
+.overviewStock,
+.overviewSection {
+  min-width: 0;
+}
+
+.overviewStock {
+  padding: 14px 18px;
+}
+
+.overviewStock .overviewSectionHeader p {
+  margin-top: 2px;
+}
+
+.overviewStock .overviewFacts > div {
+  padding: 9px 12px;
+}
+
+.overviewStock .overviewFacts strong {
+  margin-top: 3px;
+}
+
+.overviewSection {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+}
+
+.overviewSectionHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.overviewSectionHeader h3,
+.overviewSectionHeader p {
+  margin: 0;
+}
+
+.overviewSectionHeader h3 {
+  font-size: 16px;
+}
+
+.overviewSectionHeader p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.overviewSectionHeader > a,
+.protocolSummary a {
+  color: var(--teal-dark);
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.overviewFacts,
+.instrumentOverview {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.overviewFacts > div,
+.instrumentOverview > div {
+  background: #f8fbfb;
+  border-radius: 10px;
+  padding: 13px;
+}
+
+.overviewFacts span,
+.overviewFacts strong,
+.instrumentOverview span,
+.instrumentOverview strong {
+  display: block;
+}
+
+.overviewFacts span,
+.instrumentOverview span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.overviewFacts strong,
+.instrumentOverview strong {
+  font-size: 21px;
+  margin-top: 6px;
+}
+
+.overviewGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.overviewList {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.overviewListItem,
+.overviewPurchaseItem,
+.overviewMovementItem {
+  padding: 12px;
+}
+
+.overviewListItem + .overviewListItem,
+.overviewPurchaseItem + .overviewPurchaseItem,
+.overviewMovementItem + .overviewMovementItem {
+  border-top: 1px solid var(--border);
+}
+
+.overviewListItem div,
+.overviewPurchaseItem,
+.overviewMovementItem {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.overviewListItem strong,
+.overviewListItem span,
+.overviewPurchaseItem strong,
+.overviewPurchaseItem span,
+.overviewMovementItem strong,
+.overviewMovementItem span {
+  display: block;
+}
+
+.overviewListItem div > span {
+  color: #93610e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.overviewListItem p,
+.overviewPurchaseItem span,
+.overviewMovementItem span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 4px 0 0;
+}
+
+.overviewPurchaseItem > div:last-child,
+.overviewMovementItem > div:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.protocolSummary {
+  align-items: center;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr auto auto;
+  padding-top: 13px;
+}
+
+.protocolSummary span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -405,12 +573,22 @@
   .resultCount {
     grid-column: 1 / -1;
   }
+
+  .overviewFacts,
+  .instrumentOverview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 820px) {
   .compactColumn {
     display: none;
   }
+
+  .overviewGrid {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 @media (max-width: 700px) {
@@ -435,9 +613,14 @@
 
   .supplierSearch,
   .purchaseItemsHeader,
-  .purchaseFormFooter {
+  .purchaseFormFooter,
+  .overviewSectionHeader {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .overviewSectionHeader > a {
+    align-self: flex-start;
   }
 
   .supplierSearch :global(.search-input) {
@@ -470,8 +653,30 @@
 
 @media (max-width: 520px) {
   .statsGrid,
-  .filters {
+  .filters,
+  .overviewFacts,
+  .instrumentOverview {
     grid-template-columns: 1fr;
+  }
+
+  .overviewListItem div,
+  .overviewPurchaseItem,
+  .overviewMovementItem {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .overviewPurchaseItem > div:last-child,
+  .overviewMovementItem > div:last-child {
+    text-align: left;
+  }
+
+  .protocolSummary {
+    grid-template-columns: 1fr auto;
+  }
+
+  .protocolSummary a {
+    grid-column: 1 / -1;
   }
 
   .filters :global(.search-input),
