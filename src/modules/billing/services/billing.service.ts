@@ -19,13 +19,15 @@ export const billingService = {
   pendingOf: (charge: Charge) => round(charge.amount - charge.discount - charge.paid),
   summarize(charges: Charge[], payments: Payment[], adjustments: Adjustment[]): AccountSummary {
     const active = charges.filter((charge) => charge.status !== "Anulado");
-    const charged = active.reduce((total, charge) => total + charge.amount, 0);
-    const discounted = active.reduce((total, charge) => total + charge.discount, 0);
-    const refunded = adjustments.filter((item) => item.status === "Aplicada" && item.kind === "Devolución").reduce((total, item) => total + item.amount, 0);
-    const paid = round(payments.filter((payment) => payment.kind !== "Anticipo").reduce((total, payment) => total + payment.amount, 0) - refunded);
-    const advances = payments.filter((payment) => payment.kind === "Anticipo").reduce((total, payment) => total + payment.amount, 0);
-    return { charged: round(charged), discounted: round(discounted), paid, advances: round(advances), balance: round(charged - discounted - paid - advances) };
+    const charged = sum(active.map((charge) => charge.amount));
+    const discounted = sum(active.map((charge) => charge.discount));
+    const refundedOf = (kind: "advance" | "payment") => sum(adjustments.filter((item) => item.status === "Aplicada" && item.kind === "Devolución" && (payments.find((payment) => payment.id === item.originId)?.kind === "Anticipo") === (kind === "advance")).map((item) => item.amount));
+    const paid = round(sum(payments.filter((payment) => payment.kind !== "Anticipo").map((payment) => payment.amount)) - refundedOf("payment"));
+    const advances = round(sum(payments.filter((payment) => payment.kind === "Anticipo").map((payment) => payment.amount)) - refundedOf("advance"));
+    return { charged, discounted, paid, advances, balance: round(charged - discounted - paid - advances) };
   },
+  refundableOf: (payment: Payment, adjustments: Adjustment[]) => round(payment.amount - sum(adjustments.filter((item) => item.kind === "Devolución" && item.originId === payment.id && item.status !== "Rechazada").map((item) => item.amount))),
+  hasPendingFor: (originId: string, adjustments: Adjustment[]) => adjustments.some((item) => item.originId === originId && item.status === "Por autorizar"),
   openShift: (dto: OpenShiftDto, openedBy: string) => billingAdapter.shiftFromDto(dto, openedBy),
   registerMovement: (dto: RegisterMovementDto, shiftId: string, registeredBy: string) => billingAdapter.movementFromDto(dto, shiftId, registeredBy),
   closeShift: (shift: CashShift, dto: CloseShiftDto, expectedAmount: number) => billingAdapter.closedShiftFromDto(shift, dto, expectedAmount),

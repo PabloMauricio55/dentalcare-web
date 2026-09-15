@@ -15,6 +15,9 @@ type Value = {
   adjustmentsOf: (patientId: string) => Adjustment[];
   receiptsOf: (patientId: string) => Receipt[];
   receiptOf: (receiptId: string) => Receipt | undefined;
+  chargeOf: (chargeId: string) => Charge | undefined;
+  paymentOf: (paymentId: string) => Payment | undefined;
+  allAdjustments: Adjustment[];
   planOf: (patientId: string) => AgreementPlan | undefined;
   installmentsOf: (planId: string) => Installment[];
   summaryOf: (patientId: string) => AccountSummary;
@@ -54,6 +57,8 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
   const adjustmentsOf = (patientId: string) => adjustments.filter((item) => item.patientId === patientId);
   const receiptsOf = (patientId: string) => receipts.filter((item) => item.patientId === patientId);
   const receiptOf = (receiptId: string) => receipts.find((item) => item.id === receiptId);
+  const chargeOf = (chargeId: string) => charges.find((item) => item.id === chargeId);
+  const paymentOf = (paymentId: string) => payments.find((item) => item.id === paymentId);
   const planOf = (patientId: string) => plans.find((item) => item.patientId === patientId);
   const installmentsOf = (planId: string) => installments.filter((item) => item.planId === planId);
   const summaryOf = (patientId: string) => billingService.summarize(chargesOf(patientId), paymentsOf(patientId), adjustmentsOf(patientId));
@@ -95,7 +100,14 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     setAdjustments((items) => items.map((item) => item.id === id ? { ...item, status: "Aplicada", authorizedBy: authorizer } : item));
     if (target.kind === "Descuento") setCharges((items) => items.map((charge) => charge.id === target.originId ? billingService.applyDiscount(charge, target.amount) : charge));
     if (target.kind === "Anulación") setCharges((items) => items.map((charge) => charge.id === target.originId ? { ...charge, status: "Anulado" } : charge));
-    if (target.kind === "Devolución") setReceipts((items) => items.map((receipt) => receipt.id === payments.find((payment) => payment.id === target.originId)?.receiptId ? { ...receipt, status: "Anulado" } : receipt));
+    if (target.kind === "Devolución") {
+      const payment = payments.find((item) => item.id === target.originId);
+      if (!payment) return;
+      const receipt = receipts.find((item) => item.id === payment.receiptId);
+      if (target.amount >= payment.amount) setReceipts((items) => items.map((item) => item.id === payment.receiptId ? { ...item, status: "Anulado" } : item));
+      if (payment.chargeId) setCharges((items) => items.map((charge) => charge.id === payment.chargeId ? billingService.applyPayment(charge, -target.amount) : charge));
+      if (payment.method === "Efectivo" && currentShift) setMovements((items) => [...items, billingService.registerMovement({ kind: "Egreso", concept: `Devolución · recibo ${receipt?.number ?? payment.id}`, amount: target.amount }, currentShift.id, authorizer)]);
+    }
   };
 
   const rejectAdjustment = (id: string) => setAdjustments((items) => items.map((item) => item.id === id ? { ...item, status: "Rechazada", authorizedBy: authorizer } : item));
@@ -110,7 +122,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     return closed;
   };
 
-  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, receiptOf, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, payInstallment, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt, currentShift, closedShifts, movementsOf, shiftPaymentsOf, shiftSummaryOf, openShift, addMovement, closeShift };
+  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, receiptOf, chargeOf, paymentOf, allAdjustments: adjustments, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, payInstallment, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt, currentShift, closedShifts, movementsOf, shiftPaymentsOf, shiftSummaryOf, openShift, addMovement, closeShift };
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
