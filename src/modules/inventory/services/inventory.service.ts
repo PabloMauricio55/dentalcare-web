@@ -1,8 +1,9 @@
 import type { CreateConsumableDto } from "@/modules/inventory/dtos/create-consumable.dto";
 import type { CreateInstrumentDto } from "@/modules/inventory/dtos/create-instrument.dto";
+import type { CreateProtocolDto } from "@/modules/inventory/dtos/create-protocol.dto";
 import type { CreatePurchaseDto } from "@/modules/inventory/dtos/create-purchase.dto";
 import type { CreateSupplierDto } from "@/modules/inventory/dtos/create-supplier.dto";
-import type { Consumable, ExpirationState, InventoryInstrument, InventoryMovement, Purchase, Supplier } from "@/modules/inventory/models/inventory.model";
+import type { Consumable, ExpirationState, InventoryInstrument, InventoryMovement, InventoryProtocol, Purchase, Supplier } from "@/modules/inventory/models/inventory.model";
 
 // A consumable is considered close to expiration during the 30 calendar days before its date.
 export const EXPIRATION_WARNING_DAYS = 30;
@@ -25,6 +26,16 @@ export const inventoryService = {
     return {
       ...dto,
       id: `instrument-${Date.now()}`,
+      active: true,
+    };
+  },
+
+  createProtocol(dto: CreateProtocolDto): InventoryProtocol {
+    if (!dto.category) throw new Error("Protocol category is required");
+    return {
+      ...dto,
+      category: dto.category,
+      id: `protocol-${Date.now()}`,
       active: true,
     };
   },

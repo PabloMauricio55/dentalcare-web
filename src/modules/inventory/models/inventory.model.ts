@@ -65,3 +65,15 @@ export type InventoryMovement = {
   reference: string;
   description: string;
 };
+
+export type InventoryProtocolCategory = "receiving" | "storage" | "replenishment" | "expiration_control";
+
+export type InventoryProtocol = {
+  id: string;
+  code: string;
+  name: string;
+  category: InventoryProtocolCategory;
+  description: string;
+  responsible: string;
+  active: boolean;
+};

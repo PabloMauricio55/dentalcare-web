@@ -3,14 +3,16 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import type { CreateConsumableDto } from "@/modules/inventory/dtos/create-consumable.dto";
 import type { CreateInstrumentDto } from "@/modules/inventory/dtos/create-instrument.dto";
+import type { CreateProtocolDto } from "@/modules/inventory/dtos/create-protocol.dto";
 import type { CreatePurchaseDto } from "@/modules/inventory/dtos/create-purchase.dto";
 import type { CreateSupplierDto } from "@/modules/inventory/dtos/create-supplier.dto";
 import { initialConsumables } from "@/modules/inventory/mocks/inventory-consumables";
 import { initialInstruments } from "@/modules/inventory/mocks/inventory-instruments";
 import { initialInventoryMovements } from "@/modules/inventory/mocks/inventory-movements";
+import { initialInventoryProtocols } from "@/modules/inventory/mocks/inventory-protocols";
 import { initialPurchases } from "@/modules/inventory/mocks/inventory-purchases";
 import { initialSuppliers } from "@/modules/inventory/mocks/inventory-suppliers";
-import type { Consumable, InventoryInstrument, InventoryMovement, Purchase, Supplier } from "@/modules/inventory/models/inventory.model";
+import type { Consumable, InventoryInstrument, InventoryMovement, InventoryProtocol, Purchase, Supplier } from "@/modules/inventory/models/inventory.model";
 import { inventoryService } from "@/modules/inventory/services/inventory.service";
 
 type InventoryContextValue = {
@@ -30,6 +32,10 @@ type InventoryContextValue = {
   addPurchase: (dto: CreatePurchaseDto) => void;
   receivePurchase: (id: string) => boolean;
   movements: InventoryMovement[];
+  protocols: InventoryProtocol[];
+  addProtocol: (dto: CreateProtocolDto) => void;
+  updateProtocol: (id: string, dto: CreateProtocolDto) => void;
+  deactivateProtocol: (id: string) => void;
 };
 
 const InventoryContext = createContext<InventoryContextValue | null>(null);
@@ -40,6 +46,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [suppliers, setSuppliers] = useState(initialSuppliers);
   const [purchases, setPurchases] = useState(initialPurchases);
   const [movements, setMovements] = useState<InventoryMovement[]>(initialInventoryMovements);
+  const [protocols, setProtocols] = useState(initialInventoryProtocols);
 
   const value = useMemo<InventoryContextValue>(() => ({
     consumables,
@@ -96,7 +103,19 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       return true;
     },
     movements,
-  }), [consumables, instruments, movements, purchases, suppliers]);
+    protocols,
+    addProtocol: (dto) => {
+      setProtocols((current) => [...current, inventoryService.createProtocol(dto)]);
+    },
+    updateProtocol: (id, dto) => {
+      setProtocols((current) => current.map((item) => item.id === id && dto.category
+        ? { ...item, ...dto, category: dto.category }
+        : item));
+    },
+    deactivateProtocol: (id) => {
+      setProtocols((current) => current.map((item) => item.id === id ? { ...item, active: false } : item));
+    },
+  }), [consumables, instruments, movements, protocols, purchases, suppliers]);
 
   return <InventoryContext.Provider value={value}>{children}</InventoryContext.Provider>;
 }

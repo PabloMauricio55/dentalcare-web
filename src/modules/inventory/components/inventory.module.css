@@ -324,6 +324,44 @@
   color: #377f9f;
 }
 
+.protocolsTable :global(.data-table) {
+  min-width: 920px;
+}
+
+.protocolDetail {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.protocolDetail > div {
+  background: #f8fbfb;
+  border-radius: 8px;
+  padding: 11px;
+}
+
+.protocolDetail span,
+.protocolDetail strong {
+  display: block;
+}
+
+.protocolDetail > div > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.protocolDetail strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.protocolDetail .fullDetail {
+  grid-column: 1 / -1;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -408,11 +446,16 @@
 
   .purchaseItem,
   .detailSummary,
-  .movementDetail {
+  .movementDetail,
+  .protocolDetail {
     grid-template-columns: 1fr;
   }
 
   .movementDetail .fullDetail {
+    grid-column: auto;
+  }
+
+  .protocolDetail .fullDetail {
     grid-column: auto;
   }
 
