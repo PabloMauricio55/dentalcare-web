@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, BadgeCheck, Check, CheckCircle2, Eye, EyeOff, HeartPulse, KeyRound, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
-import { PublicShell } from "./PublicShell";
+import { PublicShell } from "@/modules/public-catalog/components/PublicShell";
 import styles from "./ActivateAccount.module.css";
 
 type ActivationStep = "verify" | "password" | "success";

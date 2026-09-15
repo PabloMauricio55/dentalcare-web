@@ -1,4 +1,4 @@
-import { ActivateAccount } from "@/modules/public-catalog/components/ActivateAccount";
+import { ActivateAccount } from "@/modules/auth/components/ActivateAccount";
 
 export default function ActivateAccountPage() {
   return <ActivateAccount />;

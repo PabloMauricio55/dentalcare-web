@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Eye, EyeOff, HeartPulse, KeyRound, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
-import { PublicShell } from "./PublicShell";
+import { PublicShell } from "@/modules/public-catalog/components/PublicShell";
 import styles from "./PublicLogin.module.css";
 
 type LoginErrors = Partial<Record<"cui" | "password", string>>;

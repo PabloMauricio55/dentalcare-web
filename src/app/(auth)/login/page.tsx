@@ -1,4 +1,4 @@
-import { PublicLogin } from "@/modules/public-catalog/components/PublicLogin";
+import { PublicLogin } from "@/modules/auth/components/PublicLogin";
 
 export default function LoginPage() {
   return <PublicLogin />;
