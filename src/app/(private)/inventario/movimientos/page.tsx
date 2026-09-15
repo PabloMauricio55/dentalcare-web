@@ -1,5 +1,5 @@
-import { PendingInventoryView } from "@/modules/inventory/components/PendingInventoryView";
+import { MovementsView } from "@/modules/inventory/components/MovementsView";
 
 export default function Page() {
-  return <PendingInventoryView section="Movimientos" />;
+  return <MovementsView />;
 }

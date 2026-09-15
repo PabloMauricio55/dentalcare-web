@@ -7,6 +7,7 @@ import type { CreatePurchaseDto } from "@/modules/inventory/dtos/create-purchase
 import type { CreateSupplierDto } from "@/modules/inventory/dtos/create-supplier.dto";
 import { initialConsumables } from "@/modules/inventory/mocks/inventory-consumables";
 import { initialInstruments } from "@/modules/inventory/mocks/inventory-instruments";
+import { initialInventoryMovements } from "@/modules/inventory/mocks/inventory-movements";
 import { initialPurchases } from "@/modules/inventory/mocks/inventory-purchases";
 import { initialSuppliers } from "@/modules/inventory/mocks/inventory-suppliers";
 import type { Consumable, InventoryInstrument, InventoryMovement, Purchase, Supplier } from "@/modules/inventory/models/inventory.model";
@@ -38,7 +39,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [instruments, setInstruments] = useState(initialInstruments);
   const [suppliers, setSuppliers] = useState(initialSuppliers);
   const [purchases, setPurchases] = useState(initialPurchases);
-  const [movements, setMovements] = useState<InventoryMovement[]>([]);
+  const [movements, setMovements] = useState<InventoryMovement[]>(initialInventoryMovements);
 
   const value = useMemo<InventoryContextValue>(() => ({
     consumables,

@@ -250,6 +250,48 @@
   margin-left: 10px;
 }
 
+.movementsTable :global(.data-table) {
+  min-width: 1080px;
+}
+
+.incomingQuantity {
+  color: #17795f;
+}
+
+.movementDetail {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.movementDetail > div {
+  background: #f8fbfb;
+  border-radius: 8px;
+  padding: 11px;
+}
+
+.movementDetail span,
+.movementDetail strong {
+  display: block;
+}
+
+.movementDetail span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.movementDetail strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.movementDetail .fullDetail {
+  grid-column: 1 / -1;
+}
+
 .pending {
   align-items: center;
   display: flex;
@@ -333,8 +375,13 @@
   }
 
   .purchaseItem,
-  .detailSummary {
+  .detailSummary,
+  .movementDetail {
     grid-template-columns: 1fr;
+  }
+
+  .movementDetail .fullDetail {
+    grid-column: auto;
   }
 
   .removeItem {
