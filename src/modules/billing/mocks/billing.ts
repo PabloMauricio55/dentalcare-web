@@ -1,4 +1,4 @@
-import type { Adjustment, AgreementPlan, Charge, Installment, Payment, Receipt } from "../models/billing";
+import type { Adjustment, AgreementPlan, CashMovement, CashShift, Charge, Installment, Payment, Receipt } from "../models/billing";
 
 export const initialCharges: Charge[] = [
   { id: "cg1", patientId: "p1", date: "2026-08-28", concept: "Evaluación odontológica", amount: 150, discount: 0, paid: 150, status: "Pagado" },
@@ -9,10 +9,10 @@ export const initialCharges: Charge[] = [
 ];
 
 export const initialPayments: Payment[] = [
-  { id: "pg1", patientId: "p1", date: "2026-08-28", kind: "Pago", amount: 150, method: "Efectivo", chargeId: "cg1", receiptId: "rc1" },
-  { id: "pg2", patientId: "p1", date: "2026-09-02", kind: "Abono", amount: 200, method: "Tarjeta", chargeId: "cg2", receiptId: "rc2" },
-  { id: "pg3", patientId: "p3", date: "2026-09-09", kind: "Anticipo", amount: 300, method: "Transferencia", chargeId: "", receiptId: "rc3" },
-  { id: "pg4", patientId: "p4", date: "2026-09-08", kind: "Pago", amount: 950, method: "Tarjeta", chargeId: "cg5", receiptId: "rc4" },
+  { id: "pg1", patientId: "p1", date: "2026-08-28", kind: "Pago", amount: 150, method: "Efectivo", chargeId: "cg1", receiptId: "rc1", shiftId: "" },
+  { id: "pg2", patientId: "p1", date: "2026-09-02", kind: "Abono", amount: 200, method: "Tarjeta", chargeId: "cg2", receiptId: "rc2", shiftId: "" },
+  { id: "pg3", patientId: "p3", date: "2026-09-09", kind: "Anticipo", amount: 300, method: "Transferencia", chargeId: "", receiptId: "rc3", shiftId: "ts1" },
+  { id: "pg4", patientId: "p4", date: "2026-09-08", kind: "Pago", amount: 950, method: "Tarjeta", chargeId: "cg5", receiptId: "rc4", shiftId: "" },
 ];
 
 export const initialPlans: AgreementPlan[] = [
@@ -38,3 +38,12 @@ export const initialReceipts: Receipt[] = [
 ];
 
 export const nextReceiptSequence = 105;
+
+export const initialShifts: CashShift[] = [
+  { id: "ts1", openedBy: "Mario López", openedAt: "2026-09-09 08:00", openingAmount: 500, closedAt: "2026-09-09 18:05", expectedAmount: 615, countedAmount: 605, difference: -10, closingNote: "Faltante por cambio entregado de más; se reportó a administración.", status: "Cerrada" },
+];
+
+export const initialMovements: CashMovement[] = [
+  { id: "mv1", shiftId: "ts1", time: "10:15", kind: "Ingreso", concept: "Reposición de fondo de cambio", amount: 200, registeredBy: "Mario López" },
+  { id: "mv2", shiftId: "ts1", time: "13:40", kind: "Egreso", concept: "Compra de insumos de limpieza", amount: 85, registeredBy: "Mario López" },
+];

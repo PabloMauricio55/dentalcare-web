@@ -1,17 +1,18 @@
-import type { CreatePlanDto, RegisterChargeDto, RegisterPaymentDto, RequestAdjustmentDto } from "../dtos/billing.dto";
-import type { AccountSummary, Adjustment, Charge, Payment } from "../models/billing";
+import type { CloseShiftDto, CreatePlanDto, OpenShiftDto, RegisterChargeDto, RegisterMovementDto, RegisterPaymentDto, RequestAdjustmentDto } from "../dtos/billing.dto";
+import type { AccountSummary, Adjustment, CashMovement, CashShift, CashSummary, Charge, Payment } from "../models/billing";
 import { billingAdapter } from "../adapters/billing.adapter";
 
 const round = (value: number) => Math.round(value * 100) / 100;
+const sum = (values: number[]) => round(values.reduce((total, value) => total + value, 0));
 const statusOf = (charge: Charge): Charge["status"] => charge.paid >= charge.amount - charge.discount ? "Pagado" : charge.paid > 0 ? "Parcial" : "Pendiente";
 
 export const billingService = {
   createCharge: (dto: RegisterChargeDto) => billingAdapter.chargeFromDto(dto),
   createPlan(dto: CreatePlanDto) { const plan = billingAdapter.planFromDto(dto); return { plan, installments: billingAdapter.installmentsFromPlan(plan) }; },
   requestAdjustment: (dto: RequestAdjustmentDto, requestedBy: string) => billingAdapter.adjustmentFromDto(dto, requestedBy),
-  registerPayment(dto: RegisterPaymentDto, sequence: number, concept: string) {
+  registerPayment(dto: RegisterPaymentDto, sequence: number, concept: string, shiftId: string) {
     const receipt = billingAdapter.receiptFromPayment(dto, sequence, concept);
-    return { payment: billingAdapter.paymentFromDto(dto, receipt.id), receipt };
+    return { payment: billingAdapter.paymentFromDto(dto, receipt.id, shiftId), receipt };
   },
   applyPayment(charge: Charge, amount: number): Charge { const paid = round(charge.paid + amount); return { ...charge, paid, status: statusOf({ ...charge, paid }) }; },
   applyDiscount(charge: Charge, amount: number): Charge { const discount = round(charge.discount + amount); return { ...charge, discount, status: statusOf({ ...charge, discount }) }; },
@@ -24,5 +25,16 @@ export const billingService = {
     const paid = round(payments.filter((payment) => payment.kind !== "Anticipo").reduce((total, payment) => total + payment.amount, 0) - refunded);
     const advances = payments.filter((payment) => payment.kind === "Anticipo").reduce((total, payment) => total + payment.amount, 0);
     return { charged: round(charged), discounted: round(discounted), paid, advances: round(advances), balance: round(charged - discounted - paid - advances) };
+  },
+  openShift: (dto: OpenShiftDto, openedBy: string) => billingAdapter.shiftFromDto(dto, openedBy),
+  registerMovement: (dto: RegisterMovementDto, shiftId: string, registeredBy: string) => billingAdapter.movementFromDto(dto, shiftId, registeredBy),
+  closeShift: (shift: CashShift, dto: CloseShiftDto, expectedAmount: number) => billingAdapter.closedShiftFromDto(shift, dto, expectedAmount),
+  cashDifference: (counted: number, expected: number) => round(counted - expected),
+  cashSummary(shift: CashShift, movements: CashMovement[], payments: Payment[]): CashSummary {
+    const patientCash = sum(payments.filter((payment) => payment.method === "Efectivo").map((payment) => payment.amount));
+    const otherMethods = sum(payments.filter((payment) => payment.method !== "Efectivo").map((payment) => payment.amount));
+    const manualIn = sum(movements.filter((movement) => movement.kind === "Ingreso").map((movement) => movement.amount));
+    const manualOut = sum(movements.filter((movement) => movement.kind === "Egreso").map((movement) => movement.amount));
+    return { opening: shift.openingAmount, patientCash, otherMethods, manualIn, manualOut, expected: round(shift.openingAmount + patientCash + manualIn - manualOut) };
   },
 };
