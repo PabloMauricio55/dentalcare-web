@@ -292,6 +292,38 @@
   grid-column: 1 / -1;
 }
 
+.alertsTable :global(.data-table) {
+  min-width: 1080px;
+}
+
+.codeColumn {
+  white-space: nowrap;
+}
+
+.alertSeverity {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.alertSeverity.critical {
+  background: #fee9e7;
+  color: #b83b32;
+}
+
+.alertSeverity.warning {
+  background: #fff3d6;
+  color: #93610e;
+}
+
+.alertSeverity.info {
+  background: #e4f0f6;
+  color: #377f9f;
+}
+
 .pending {
   align-items: center;
   display: flex;

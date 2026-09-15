@@ -1,5 +1,5 @@
-import { PendingInventoryView } from "@/modules/inventory/components/PendingInventoryView";
+import { AlertsView } from "@/modules/inventory/components/AlertsView";
 
 export default function Page() {
-  return <PendingInventoryView section="Alertas" />;
+  return <AlertsView />;
 }
