@@ -13,3 +13,14 @@ export type Consumable = {
 };
 
 export type ExpirationState = "expired" | "expiring-soon" | "current" | "not-applicable";
+
+export type InventoryInstrument = {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  totalQuantity: number;
+  availableQuantity: number;
+  location: string;
+  active: boolean;
+};

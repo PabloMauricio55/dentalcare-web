@@ -1,5 +1,6 @@
 import type { CreateConsumableDto } from "@/modules/inventory/dtos/create-consumable.dto";
-import type { Consumable, ExpirationState } from "@/modules/inventory/models/inventory.model";
+import type { CreateInstrumentDto } from "@/modules/inventory/dtos/create-instrument.dto";
+import type { Consumable, ExpirationState, InventoryInstrument } from "@/modules/inventory/models/inventory.model";
 
 // A consumable is considered close to expiration during the 30 calendar days before its date.
 export const EXPIRATION_WARNING_DAYS = 30;
@@ -15,6 +16,14 @@ export const inventoryService = {
       expirationDate: dto.expirationDate || undefined,
       id: `consumable-${Date.now()}`,
       status: "active",
+    };
+  },
+
+  createInstrument(dto: CreateInstrumentDto): InventoryInstrument {
+    return {
+      ...dto,
+      id: `instrument-${Date.now()}`,
+      active: true,
     };
   },
 

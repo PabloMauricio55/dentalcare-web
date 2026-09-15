@@ -1,5 +1,5 @@
-import { PendingInventoryView } from "@/modules/inventory/components/PendingInventoryView";
+import { InstrumentsView } from "@/modules/inventory/components/InstrumentsView";
 
 export default function Page() {
-  return <PendingInventoryView section="Instrumental" />;
+  return <InstrumentsView />;
 }
