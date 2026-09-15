@@ -15,7 +15,7 @@ export const billingAdapter = {
     const share = Math.round((financed / plan.installmentCount) * 100) / 100;
     return Array.from({ length: plan.installmentCount }, (_, index) => ({ id: `${plan.id}-${index + 1}`, planId: plan.id, number: index + 1, dueDate: addMonths(plan.startDate, index + 1), amount: index === plan.installmentCount - 1 ? Math.round((financed - share * (plan.installmentCount - 1)) * 100) / 100 : share, status: "Pendiente" }));
   },
-  receiptFromPayment(dto: RegisterPaymentDto, sequence: number, concept: string): Receipt { return { id: `rc${Date.now()}`, number: `DC-${String(sequence).padStart(6, "0")}`, patientId: dto.patientId, date: today(), concept, amount: dto.amount, method: dto.method, status: "Emitido", sentTo: "" }; },
+  receiptFromPayment(dto: RegisterPaymentDto, sequence: number, concept: string): Receipt { return { id: `rc${Date.now()}`, number: `DC-${String(sequence).padStart(6, "0")}`, patientId: dto.patientId, date: today(), concept, amount: dto.amount, method: dto.method, status: "Emitido", sentTo: "", printCount: 0 }; },
   shiftFromDto(dto: OpenShiftDto, openedBy: string): CashShift { return { ...dto, id: `ts${Date.now()}`, openedBy, openedAt: now(), closedAt: "", expectedAmount: 0, countedAmount: 0, difference: 0, closingNote: "", status: "Abierta" }; },
   movementFromDto(dto: RegisterMovementDto, shiftId: string, registeredBy: string): CashMovement { return { ...dto, id: `mv${Date.now()}`, shiftId, time: now().slice(11), registeredBy }; },
   closedShiftFromDto(shift: CashShift, dto: CloseShiftDto, expectedAmount: number): CashShift { return { ...shift, ...dto, closedAt: now(), expectedAmount, difference: Math.round((dto.countedAmount - expectedAmount) * 100) / 100, status: "Cerrada" }; },

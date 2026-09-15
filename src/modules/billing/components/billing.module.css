@@ -1,0 +1,10 @@
+.printSheet { display: grid; gap: 18px; margin: 0 auto; max-width: 720px; }
+.printHeading { align-items: flex-start; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; padding-bottom: 14px; }
+.printHeading h3 { font-size: 20px; margin: 0; }
+.printHeading p { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+.printFooter { color: var(--muted); font-size: 11px; margin: 0; text-align: center; }
+
+@media print {
+  .noPrint { display: none !important; }
+  .printSheet { max-width: none; }
+}

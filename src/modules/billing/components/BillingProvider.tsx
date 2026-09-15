@@ -18,6 +18,7 @@ type Value = {
   chargeOf: (chargeId: string) => Charge | undefined;
   paymentOf: (paymentId: string) => Payment | undefined;
   allAdjustments: Adjustment[];
+  allReceipts: Receipt[];
   planOf: (patientId: string) => AgreementPlan | undefined;
   installmentsOf: (planId: string) => Installment[];
   summaryOf: (patientId: string) => AccountSummary;
@@ -29,6 +30,7 @@ type Value = {
   authorizeAdjustment: (id: string) => void;
   rejectAdjustment: (id: string) => void;
   sendReceipt: (id: string, email: string) => void;
+  reprintReceipt: (id: string) => void;
   currentShift: CashShift | undefined;
   closedShifts: CashShift[];
   movementsOf: (shiftId: string) => CashMovement[];
@@ -112,6 +114,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
 
   const rejectAdjustment = (id: string) => setAdjustments((items) => items.map((item) => item.id === id ? { ...item, status: "Rechazada", authorizedBy: authorizer } : item));
   const sendReceipt = (id: string, email: string) => setReceipts((items) => items.map((item) => item.id === id ? { ...item, sentTo: email } : item));
+  const reprintReceipt = (id: string) => setReceipts((items) => items.map((item) => item.id === id ? { ...item, printCount: item.printCount + 1 } : item));
 
   const openShift = (dto: OpenShiftDto) => { if (!currentShift) setShifts((items) => [...items, billingService.openShift(dto, operator)]); };
   const addMovement = (dto: RegisterMovementDto) => { if (currentShift) setMovements((items) => [...items, billingService.registerMovement(dto, currentShift.id, operator)]); };
@@ -122,7 +125,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     return closed;
   };
 
-  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, receiptOf, chargeOf, paymentOf, allAdjustments: adjustments, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, payInstallment, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt, currentShift, closedShifts, movementsOf, shiftPaymentsOf, shiftSummaryOf, openShift, addMovement, closeShift };
+  const value = { chargesOf, paymentsOf, adjustmentsOf, receiptsOf, receiptOf, chargeOf, paymentOf, allAdjustments: adjustments, allReceipts: receipts, planOf, installmentsOf, summaryOf, addCharge, registerPayment, createPlan, payInstallment, requestAdjustment, authorizeAdjustment, rejectAdjustment, sendReceipt, reprintReceipt, currentShift, closedShifts, movementsOf, shiftPaymentsOf, shiftSummaryOf, openShift, addMovement, closeShift };
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

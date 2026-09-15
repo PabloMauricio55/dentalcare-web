@@ -31,10 +31,10 @@ export const initialAdjustments: Adjustment[] = [
 ];
 
 export const initialReceipts: Receipt[] = [
-  { id: "rc1", number: "DC-000101", patientId: "p1", date: "2026-08-28", concept: "Evaluación odontológica", amount: 150, method: "Efectivo", status: "Emitido", sentTo: "" },
-  { id: "rc2", number: "DC-000102", patientId: "p1", date: "2026-09-02", concept: "Abono · Restauración con resina", amount: 200, method: "Tarjeta", status: "Emitido", sentTo: "maria.lopez@email.com" },
-  { id: "rc3", number: "DC-000103", patientId: "p3", date: "2026-09-09", concept: "Anticipo · Profilaxis dental", amount: 300, method: "Transferencia", status: "Emitido", sentTo: "" },
-  { id: "rc4", number: "DC-000104", patientId: "p4", date: "2026-09-08", concept: "Blanqueamiento dental", amount: 950, method: "Tarjeta", status: "Emitido", sentTo: "luis.soto@email.com" },
+  { id: "rc1", number: "DC-000101", patientId: "p1", date: "2026-08-28", concept: "Evaluación odontológica", amount: 150, method: "Efectivo", status: "Emitido", sentTo: "", printCount: 1 },
+  { id: "rc2", number: "DC-000102", patientId: "p1", date: "2026-09-02", concept: "Abono · Restauración con resina", amount: 200, method: "Tarjeta", status: "Emitido", sentTo: "maria.lopez@email.com", printCount: 1 },
+  { id: "rc3", number: "DC-000103", patientId: "p3", date: "2026-09-09", concept: "Anticipo · Profilaxis dental", amount: 300, method: "Transferencia", status: "Emitido", sentTo: "", printCount: 0 },
+  { id: "rc4", number: "DC-000104", patientId: "p4", date: "2026-09-08", concept: "Blanqueamiento dental", amount: 950, method: "Tarjeta", status: "Emitido", sentTo: "luis.soto@email.com", printCount: 2 },
 ];
 
 export const nextReceiptSequence = 105;
