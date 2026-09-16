@@ -1,7 +1,10 @@
 "use client";
 
-import { DataTable, EmptyState, PageHeader, StatCard, type Column } from "@/shared/components";
-import type { ReportKey, ResolvedChart, ResolvedRow } from "../models/report";
+import { FileSpreadsheet, FileText } from "lucide-react";
+import { useState } from "react";
+import { Button, DataTable, EmptyState, PageHeader, StatCard, type Column } from "@/shared/components";
+import type { ExportFormat, ReportKey, ResolvedChart, ResolvedRow } from "../models/report";
+import { ExportPreviewDialog } from "./ExportPreviewDialog";
 import { BarChart } from "./charts/BarChart";
 import { DonutChart } from "./charts/DonutChart";
 import { LineChart } from "./charts/LineChart";
@@ -17,7 +20,8 @@ function renderChart(chart: ResolvedChart) {
 }
 
 export function ReportView({ reportKey }: { reportKey: ReportKey }) {
-  const { reportOf } = useReports();
+  const { reportOf, exportPreviewOf } = useReports();
+  const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
   const report = reportOf(reportKey);
 
   if (!report) return <section className="card"><EmptyState title="Reporte no disponible" description="No encontramos datos simulados para este reporte." /></section>;
@@ -29,7 +33,14 @@ export function ReportView({ reportKey }: { reportKey: ReportKey }) {
   ];
 
   return <>
-    <PageHeader title={report.title} description={`${report.description} · ${report.periodLabel}`} />
+    <PageHeader
+      title={report.title}
+      description={`${report.description} · ${report.periodLabel}`}
+      actions={<>
+        <Button variant="ghost" onClick={() => setExportFormat("PDF")}><FileText size={17} /> Vista previa PDF</Button>
+        <Button variant="secondary" onClick={() => setExportFormat("Excel")}><FileSpreadsheet size={17} /> Vista previa Excel</Button>
+      </>}
+    />
 
     <section className="stats-grid">
       {report.indicators.map((indicator, index) => <StatCard key={indicator.id} label={indicator.label} value={indicator.display} helper={indicator.helper} tone={tones[index % tones.length]} />)}
@@ -52,5 +63,7 @@ export function ReportView({ reportKey }: { reportKey: ReportKey }) {
       </div>
       <DataTable columns={columns} rows={report.table.rows} emptyMessage="Sin datos para el período seleccionado." />
     </section>
+
+    <ExportPreviewDialog preview={exportFormat ? exportPreviewOf(reportKey, exportFormat) : undefined} report={report} onClose={() => setExportFormat(null)} />
   </>;
 }
