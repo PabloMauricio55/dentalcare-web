@@ -1,10 +1,20 @@
 "use client";
 
 import { DataTable, EmptyState, PageHeader, StatCard, type Column } from "@/shared/components";
-import type { ReportKey, ResolvedRow } from "../models/report";
+import type { ReportKey, ResolvedChart, ResolvedRow } from "../models/report";
+import { BarChart } from "./charts/BarChart";
+import { DonutChart } from "./charts/DonutChart";
+import { LineChart } from "./charts/LineChart";
 import { useReports } from "./ReportsProvider";
+import styles from "./reports.module.css";
 
 const tones = ["teal", "blue", "green", "amber"] as const;
+
+function renderChart(chart: ResolvedChart) {
+  if (chart.kind === "donut") return <DonutChart points={chart.points} total={chart.total} totalDisplay={chart.totalDisplay} label={chart.title} />;
+  if (chart.kind === "line") return <LineChart points={chart.points} max={chart.max} label={chart.title} />;
+  return <BarChart points={chart.points} max={chart.max} label={chart.title} />;
+}
 
 export function ReportView({ reportKey }: { reportKey: ReportKey }) {
   const { reportOf } = useReports();
@@ -24,6 +34,16 @@ export function ReportView({ reportKey }: { reportKey: ReportKey }) {
     <section className="stats-grid">
       {report.indicators.map((indicator, index) => <StatCard key={indicator.id} label={indicator.label} value={indicator.display} helper={indicator.helper} tone={tones[index % tones.length]} />)}
     </section>
+
+    {report.charts.length > 0 && <section className={styles.chartGrid}>
+      {report.charts.map((chart) => <article className="card" key={chart.id}>
+        <div className="card-heading">
+          <div><h3>{chart.title}</h3><p>{chart.description}</p></div>
+          <div className={styles.chartTotal}><span className="stat-label">Total</span><strong>{chart.totalDisplay}</strong></div>
+        </div>
+        {renderChart(chart)}
+      </article>)}
+    </section>}
 
     <section className="card">
       <div className="card-heading">

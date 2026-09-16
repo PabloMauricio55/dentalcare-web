@@ -23,6 +23,8 @@ const chartFrom = (chart: ChartSeries, period: PeriodKey): ResolvedChart => {
     description: chart.description,
     kind: chart.kind,
     max,
+    total: round(total),
+    totalDisplay: formatValue(round(total), chart.format),
     points: chart.points.map((point) => ({ label: point.label, value: point.values[period], display: formatValue(point.values[period], chart.format), percent: total ? round((point.values[period] / total) * 100) : 0 })),
   };
 };

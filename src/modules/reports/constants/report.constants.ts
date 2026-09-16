@@ -7,5 +7,8 @@ export const periods: Array<{ key: PeriodKey; label: string; helper: string }> =
   { key: "trimestre", label: "Trimestre", helper: "Julio a septiembre 2026" },
 ];
 
+export const seriesColors = ["#17bcbc", "#4e98b8", "#2e9e6b", "#d99a2b", "#8a7fb8", "#d08a6a"];
+export const colorAt = (index: number) => seriesColors[index % seriesColors.length];
+
 export const periodLabel = (period: PeriodKey) => periods.find((item) => item.key === period)?.label ?? "Hoy";
 export const periodHelper = (period: PeriodKey) => periods.find((item) => item.key === period)?.helper ?? "";

@@ -13,7 +13,7 @@ export type ReportDefinition = { key: ReportKey; title: string; description: str
 
 export type ResolvedIndicator = { id: string; label: string; helper: string; display: string };
 export type ResolvedPoint = { label: string; value: number; display: string; percent: number };
-export type ResolvedChart = { id: string; title: string; description: string; kind: ChartKind; points: ResolvedPoint[]; max: number };
+export type ResolvedChart = { id: string; title: string; description: string; kind: ChartKind; points: ResolvedPoint[]; max: number; total: number; totalDisplay: string };
 export type ResolvedRow = { id: string; label: string; detail: string; value: number; display: string; share: number };
 export type ResolvedTable = { title: string; description: string; totalLabel: string; rows: ResolvedRow[]; total: number; totalDisplay: string };
 export type ResolvedReport = { key: ReportKey; title: string; description: string; periodLabel: string; indicators: ResolvedIndicator[]; charts: ResolvedChart[]; table: ResolvedTable };
