@@ -8,8 +8,10 @@ import { PublicShell } from "@/modules/public-catalog/components/PublicShell";
 import styles from "./ActivateAccount.module.css";
 
 type ActivationStep = "verify" | "password" | "success";
-type VerificationErrors = Partial<Record<"cui" | "temporaryPassword", string>>;
+type VerificationErrors = Partial<Record<"activationCode" | "patientIdentifier", string>>;
 type PasswordErrors = Partial<Record<"password" | "confirmation", string>>;
+
+const demoAccount = { activationCode: "PAC-2026", patientIdentifier: "123456789" };
 
 const passwordRequirements = [
   { label: "Mínimo 8 caracteres", matches: (value: string) => value.length >= 8 },
@@ -20,23 +22,26 @@ const passwordRequirements = [
 
 export function ActivateAccount() {
   const [step, setStep] = useState<ActivationStep>("verify");
-  const [cui, setCui] = useState("");
-  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [activationCode, setActivationCode] = useState("");
+  const [patientIdentifier, setPatientIdentifier] = useState("");
   const [verificationErrors, setVerificationErrors] = useState<VerificationErrors>({});
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({});
-  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const verifyAccount = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: VerificationErrors = {};
-    const normalizedCui = cui.replace(/\s/g, "");
+    const normalizedCode = activationCode.trim().toUpperCase();
+    const normalizedIdentifier = patientIdentifier.trim();
 
-    if (!/^\d{13}$/.test(normalizedCui)) nextErrors.cui = "Ingresa los 13 dígitos de tu DPI o CUI.";
-    if (!temporaryPassword.trim()) nextErrors.temporaryPassword = "Ingresa la contraseña temporal entregada por la clínica.";
+    if (!normalizedCode) nextErrors.activationCode = "Ingresa tu código de activación o usuario.";
+    if (!normalizedIdentifier) nextErrors.patientIdentifier = "Ingresa tu documento o identificador.";
+    if (normalizedCode && normalizedIdentifier && (normalizedCode !== demoAccount.activationCode || normalizedIdentifier !== demoAccount.patientIdentifier)) {
+      nextErrors.activationCode = "No pudimos verificar los datos ingresados.";
+    }
 
     setVerificationErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) setStep("password");
@@ -83,14 +88,15 @@ export function ActivateAccount() {
             {step === "verify" && <form className={styles.activationForm} onSubmit={verifyAccount} noValidate>
               <div className={styles.activationFormHeading}><span><KeyRound size={26} aria-hidden="true" /></span><div><h2 id="activation-title">Activa tu cuenta</h2><p>Ingresa los datos que recibiste de la clínica para configurar tu acceso.</p></div></div>
               <p className={styles.activationNotice}><ShieldCheck size={18} aria-hidden="true" />Las cuentas de pacientes son creadas previamente por la clínica. No existe registro libre.</p>
-              <label className={styles.activationField} htmlFor="activation-cui"><span>DPI o CUI <b>*</b></span><div className={verificationErrors.cui ? styles.activationInputError : ""}><UserRound size={19} aria-hidden="true" /><input id="activation-cui" name="cui" value={cui} onChange={(event) => { setCui(event.target.value.replace(/\D/g, "").slice(0, 13)); setVerificationErrors((current) => ({ ...current, cui: undefined })); }} inputMode="numeric" autoComplete="username" placeholder="Ingresa tus 13 dígitos" aria-invalid={Boolean(verificationErrors.cui)} aria-describedby={verificationErrors.cui ? "activation-cui-error" : undefined} /></div>{verificationErrors.cui && <small id="activation-cui-error" className={styles.activationError}>{verificationErrors.cui}</small>}</label>
-              <label className={styles.activationField} htmlFor="activation-temporary-password"><span>Contraseña temporal <b>*</b></span><div className={verificationErrors.temporaryPassword ? styles.activationInputError : ""}><KeyRound size={19} aria-hidden="true" /><input id="activation-temporary-password" name="temporary-password" value={temporaryPassword} onChange={(event) => { setTemporaryPassword(event.target.value); setVerificationErrors((current) => ({ ...current, temporaryPassword: undefined })); }} type={showTemporaryPassword ? "text" : "password"} autoComplete="current-password" placeholder="Ingresa la contraseña temporal" aria-invalid={Boolean(verificationErrors.temporaryPassword)} aria-describedby={verificationErrors.temporaryPassword ? "activation-temporary-password-error" : undefined} /><PasswordToggle shown={showTemporaryPassword} onClick={() => setShowTemporaryPassword((shown) => !shown)} /></div>{verificationErrors.temporaryPassword && <small id="activation-temporary-password-error" className={styles.activationError}>{verificationErrors.temporaryPassword}</small>}</label>
+              <label className={styles.activationField} htmlFor="activation-code"><span>Código de activación o usuario <b>*</b></span><div className={verificationErrors.activationCode ? styles.activationInputError : ""}><KeyRound size={19} aria-hidden="true" /><input id="activation-code" name="activation-code" value={activationCode} onChange={(event) => { setActivationCode(event.target.value); setVerificationErrors((current) => ({ ...current, activationCode: undefined })); }} autoComplete="username" placeholder="Ej. PAC-2026" aria-invalid={Boolean(verificationErrors.activationCode)} aria-describedby={verificationErrors.activationCode ? "activation-code-error" : "activation-demo-data"} /></div>{verificationErrors.activationCode && <small id="activation-code-error" className={styles.activationError}>{verificationErrors.activationCode}</small>}</label>
+              <label className={styles.activationField} htmlFor="activation-identifier"><span>Documento o identificador del paciente <b>*</b></span><div className={verificationErrors.patientIdentifier ? styles.activationInputError : ""}><UserRound size={19} aria-hidden="true" /><input id="activation-identifier" name="patient-identifier" value={patientIdentifier} onChange={(event) => { setPatientIdentifier(event.target.value); setVerificationErrors((current) => ({ ...current, patientIdentifier: undefined })); }} inputMode="numeric" autoComplete="off" placeholder="Ej. 123456789" aria-invalid={Boolean(verificationErrors.patientIdentifier)} aria-describedby={verificationErrors.patientIdentifier ? "activation-identifier-error" : "activation-demo-data"} /></div>{verificationErrors.patientIdentifier && <small id="activation-identifier-error" className={styles.activationError}>{verificationErrors.patientIdentifier}</small>}</label>
+              <p id="activation-demo-data" className={styles.activationNotice}><KeyRound size={18} aria-hidden="true" />Datos ficticios de demostración: código <strong>PAC-2026</strong> e identificador <strong>123456789</strong>.</p>
               <button className={styles.activationSubmit} type="submit">Verificar mi cuenta</button>
               <p className={styles.activationHelp}>¿No encuentras tu contraseña temporal? <Link href="/contacto">Comunícate con la clínica</Link></p>
             </form>}
 
             {step === "password" && <form className={styles.activationForm} onSubmit={activateAccount} noValidate>
-              <div className={styles.activationPatientFound}><span><CheckCircle2 size={24} aria-hidden="true" /></span><div><small>Paciente encontrado</small><strong>Brayan M.</strong><p>Tu cuenta está lista para activarse.</p></div></div>
+              <div className={styles.activationPatientFound}><span><CheckCircle2 size={24} aria-hidden="true" /></span><div><small>Cuenta verificada</small><strong>Paciente de demostración</strong><p>Tu cuenta está lista para activarse.</p></div></div>
               <div className={styles.activationFormHeading}><span><LockKeyhole size={26} aria-hidden="true" /></span><div><h2 id="activation-title">Crea tu contraseña</h2><p>Elige una contraseña segura para tus próximos ingresos.</p></div></div>
               <label className={styles.activationField} htmlFor="activation-new-password"><span>Nueva contraseña <b>*</b></span><div className={passwordErrors.password ? styles.activationInputError : ""}><LockKeyhole size={19} aria-hidden="true" /><input id="activation-new-password" name="new-password" value={password} onChange={(event) => { setPassword(event.target.value); setPasswordErrors((current) => ({ ...current, password: undefined })); }} type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Crea una contraseña" aria-invalid={Boolean(passwordErrors.password)} aria-describedby={passwordErrors.password ? "activation-password-error" : "activation-password-requirements"} /><PasswordToggle shown={showPassword} onClick={() => setShowPassword((shown) => !shown)} /></div>{passwordErrors.password && <small id="activation-password-error" className={styles.activationError}>{passwordErrors.password}</small>}</label>
               <ul id="activation-password-requirements" className={styles.activationRequirements} aria-label="Requisitos de contraseña">{passwordRequirements.map((requirement) => <li className={requirement.matches(password) ? styles.activationRequirementMet : ""} key={requirement.label}><Check size={14} aria-hidden="true" />{requirement.label}</li>)}</ul>
