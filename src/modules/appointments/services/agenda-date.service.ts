@@ -62,4 +62,3 @@ export function formatShortDate(value: string) {
 export function formatMonth(value: string) {
   return new Intl.DateTimeFormat("es-GT", { month: "long", year: "numeric" }).format(parseDate(value));
 }
-
