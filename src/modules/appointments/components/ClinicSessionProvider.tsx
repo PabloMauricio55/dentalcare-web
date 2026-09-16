@@ -19,6 +19,7 @@ type ClinicContextValue = {
   updatePatient: (patient: Patient) => void;
   createAccess: (patientId: string) => string;
   addAppointment: (dto: ScheduleAppointmentDto) => void;
+  updateAppointment: (appointment: Appointment) => void;
   updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
   rescheduleAppointment: (id: string, date: string, time: string) => void;
 };
@@ -41,9 +42,10 @@ export function ClinicSessionProvider({ children }: { children: React.ReactNode 
     return patientService.createTemporaryPassword();
   };
   const addAppointment = (dto: ScheduleAppointmentDto) => setAppointments((current) => [...current, appointmentService.create(dto)]);
+  const updateAppointment = (next: Appointment) => setAppointments((current) => current.map((item) => item.id === next.id ? next : item));
   const updateAppointmentStatus = (id: string, status: AppointmentStatus) => setAppointments((current) => current.map((item) => item.id === id ? { ...item, status } : item));
   const rescheduleAppointment = (id: string, date: string, time: string) => setAppointments((current) => current.map((item) => item.id === id ? { ...item, date, time, status: "Confirmada" } : item));
-  const value = { patients, appointments, selectedPatientId, selectPatient, addPatient, updatePatient, createAccess, addAppointment, updateAppointmentStatus, rescheduleAppointment };
+  const value = { patients, appointments, selectedPatientId, selectPatient, addPatient, updatePatient, createAccess, addAppointment, updateAppointment, updateAppointmentStatus, rescheduleAppointment };
   return <ClinicContext.Provider value={value}>{children}</ClinicContext.Provider>;
 }
 

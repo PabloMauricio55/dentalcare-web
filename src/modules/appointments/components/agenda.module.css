@@ -1,0 +1,190 @@
+.summary {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 14px;
+}
+
+.calendarScroll {
+  overflow-x: auto;
+}
+
+.weekGrid,
+.monthGrid {
+  display: grid;
+  min-width: 860px;
+}
+
+.weekGrid {
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+}
+
+.monthGrid {
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+}
+
+.dayHeader,
+.monthHeader {
+  background: #f7fbfb;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 11px 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.dayColumn {
+  border-right: 1px solid var(--border);
+  min-height: 330px;
+  padding: 8px;
+}
+
+.dayColumn:last-child {
+  border-right: 0;
+}
+
+.monthCell {
+  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  min-height: 118px;
+  padding: 7px;
+}
+
+.monthCell:nth-child(7n) {
+  border-right: 0;
+}
+
+.outsideMonth {
+  background: #fafcfc;
+  color: #9aabab;
+}
+
+.todayCell {
+  background: #f0fbf9;
+  box-shadow: inset 0 0 0 2px #aee4de;
+}
+
+.dateNumber {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.dateNumber span {
+  color: var(--teal-dark);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.compactList {
+  display: grid;
+  gap: 6px;
+}
+
+.compactAppointment {
+  background: #e8f7f5;
+  border: 0;
+  border-left: 3px solid var(--teal);
+  border-radius: 7px;
+  color: var(--text);
+  display: grid;
+  gap: 2px;
+  padding: 7px;
+  text-align: left;
+  width: 100%;
+}
+
+.compactAppointment strong {
+  font-size: 11px;
+}
+
+.compactAppointment span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.closedAppointment {
+  background: #fff1f1;
+  border-left-color: var(--danger);
+  opacity: .75;
+}
+
+.emptyDay {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 15px 5px;
+  text-align: center;
+}
+
+.actionList {
+  display: grid;
+  gap: 8px;
+}
+
+.actionList button {
+  align-items: center;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  display: flex;
+  gap: 10px;
+  min-height: 43px;
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.actionList button:hover {
+  background: var(--canvas);
+  border-color: #b7dede;
+}
+
+.actionList .dangerAction {
+  color: var(--danger);
+}
+
+.detailGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.detailGrid div {
+  background: var(--canvas);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.detailGrid span,
+.detailGrid strong {
+  display: block;
+}
+
+.detailGrid span {
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.detailGrid strong {
+  font-size: 13px;
+}
+
+.fullDetail {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 700px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fullDetail {
+    grid-column: auto;
+  }
+}
