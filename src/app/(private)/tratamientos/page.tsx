@@ -1,2 +1,5 @@
-import { ModulePlaceholder } from "@/shared/components/ui/ModulePlaceholder";
-export default function Page() { return <ModulePlaceholder title="Tratamientos" description="Planes de tratamiento y procedimientos." issue="ticket #8" />; }
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/tratamientos/planes");
+}
