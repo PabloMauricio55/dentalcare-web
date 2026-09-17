@@ -1,4 +1,10 @@
-.chartGrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+/* Permite que las tarjetas se achiquen hasta el ancho real de la pantalla.
+   Sin esto, la rejilla respeta el ancho mínimo de las tablas y desborda la página. */
+.stack { grid-template-columns: minmax(0, 1fr); }
+.stack > * { min-width: 0; }
+
+.chartGrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
+.chartGrid > * { min-width: 0; }
 
 .bars { display: grid; gap: 13px; padding-top: 4px; }
 .barRow { align-items: center; display: grid; gap: 11px; grid-template-columns: minmax(96px, 26%) 1fr auto; }
