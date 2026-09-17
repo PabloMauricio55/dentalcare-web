@@ -1,31 +1,38 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
-
-type Role = "Administrador" | "Secretaría" | "Odontólogo" | "Asistente" | "Caja";
+import { createContext, useContext, useMemo, useState, useSyncExternalStore } from "react";
+import { appRoles, type AppRole } from "@/shared/constants/role-access";
 
 type AppContextValue = {
-  role: Role;
-  setRole: (role: Role) => void;
+  role: AppRole;
+  setRole: (role: AppRole) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export const roles: Role[] = ["Administrador", "Secretaría", "Odontólogo", "Asistente", "Caja"];
+export const roles = appRoles;
+
+const roleListeners = new Set<() => void>();
+const subscribeRole = (listener: () => void) => {
+  roleListeners.add(listener);
+  return () => roleListeners.delete(listener);
+};
+const getServerRole = (): AppRole => "Administrador";
+const getStoredRole = (): AppRole => {
+  const storedValue = sessionStorage.getItem("dentalcare-role");
+  const stored = storedValue === "Caja" ? "Cajero" : storedValue as AppRole | null;
+  return stored && roles.includes(stored) ? stored : "Administrador";
+};
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [role, setRoleState] = useState<Role>(() => {
-    if (typeof window === "undefined") return "Administrador";
-    const stored = sessionStorage.getItem("dentalcare-role") as Role | null;
-    return stored && roles.includes(stored) ? stored : "Administrador";
-  });
+  const role = useSyncExternalStore(subscribeRole, getStoredRole, getServerRole);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const setRole = (nextRole: Role) => {
-    setRoleState(nextRole);
+  const setRole = (nextRole: AppRole) => {
     sessionStorage.setItem("dentalcare-role", nextRole);
+    roleListeners.forEach((listener) => listener());
   };
 
   const value = useMemo(
