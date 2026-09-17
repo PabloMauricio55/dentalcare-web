@@ -93,7 +93,7 @@ export function TreatmentPlansView() {
     { key: "procedures", header: "Procedimientos", cell: (row) => row.procedures.length },
     { key: "total", header: "Total", cell: (row) => <strong>{formatCurrency(treatmentService.planTotal(row.procedures))}</strong> },
     { key: "status", header: "Estado", cell: (row) => <StatusBadge status={row.status} /> },
-    { key: "actions", header: "", className: "actions-cell", cell: (row) => <div className="table-actions"><button aria-label={`Ver ${row.name}`} onClick={() => setDetail(row)}><Eye size={16} /></button>{row.status === "Borrador" && <Button onClick={() => requestApproval(row)}>Aprobar plan</Button>}</div> },
+    { key: "actions", header: "", className: "actions-cell", cell: (row) => <div className="table-actions"><button aria-label={`Ver ${row.name}`} onClick={() => setDetail(row)}><Eye size={16} /></button>{row.status === "Borrador" && <Button className={styles.approvePlanButton} onClick={() => requestApproval(row)}>Aprobar plan</Button>}</div> },
   ];
 
   if (!patient) return <section className="card"><p>No hay pacientes disponibles para crear planes de tratamiento.</p></section>;
@@ -105,7 +105,7 @@ export function TreatmentPlansView() {
       <div className={styles.patientIdentity}><span className="patient-avatar large"><UserRound size={20} /></span><div><small>Paciente seleccionado</small><strong>{patient.name}</strong><span>{patient.code} · DPI {patient.dpi} · {patient.phone}</span></div></div>
       <label className="compact-field"><span>Cambiar paciente</span><select value={effectivePatientId} onChange={(event) => selectPatient(event.target.value)}>{patients.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.code}</option>)}</select></label>
     </section>
-    <section className="card">
+    <section className={`card ${styles.plansTableCard}`}>
       <div className="card-heading"><div><h3>Planes registrados</h3><p>{patientPlans.length} planes asociados a {patient.name}</p></div></div>
       <DataTable columns={columns} rows={patientPlans} emptyMessage="Este paciente todavía no tiene planes de tratamiento." />
     </section>

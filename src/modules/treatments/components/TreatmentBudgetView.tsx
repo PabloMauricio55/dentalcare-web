@@ -72,7 +72,7 @@ export function TreatmentBudgetView() {
       {error && <p className={`form-error ${styles.budgetError}`}>{error}</p>}
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "El detalle y las acciones del presupuesto aparecerán aquí." : "Crea primero un plan de tratamiento para este paciente."} /></section>}
-    {selectedPlan && <section className="card">
+    {selectedPlan && <section className={`card ${styles.budgetTableCard}`}>
       <div className={styles.budgetHeader}>
         <div><span>Plan seleccionado</span><h3>{selectedPlan.name}</h3><p>{selectedPlan.professional} · {selectedPlan.date}</p></div>
         <div className={styles.budgetStatuses}><div><small>Plan</small><StatusBadge status={selectedPlan.status} /></div><div><small>Presupuesto</small>{selectedBudget ? <StatusBadge status={selectedBudget.status} /> : <span className={styles.notGenerated}>No generado</span>}</div></div>
