@@ -16,25 +16,24 @@ const today = () => new Intl.DateTimeFormat("en-CA").format(new Date());
 
 export function TreatmentProcedureView() {
   const { patients, selectedPatientId, selectPatient } = useClinicSession();
-  const { plans, procedureRecords, addProcedureRecord } = useTreatmentPlans();
+  const { plans, procedureRecords, selectedTreatmentPlanId, selectTreatmentPlan, addProcedureRecord } = useTreatmentPlans();
   const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
   const patient = patients.find((item) => item.id === effectivePatientId);
   const patientPlans = useMemo(() => plans.filter((plan) => plan.patientId === effectivePatientId), [effectivePatientId, plans]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const selectedPlan = patientPlans.find((plan) => plan.id === selectedTreatmentPlanId);
   const [selectedProcedureId, setSelectedProcedureId] = useState("");
   const [date, setDate] = useState(today());
   const [time, setTime] = useState("09:00");
-  const [professional, setProfessional] = useState("");
+  const [professional, setProfessional] = useState(selectedPlan?.professional ?? "");
   const [notes, setNotes] = useState("");
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [notice, setNotice] = useState("");
   const [detail, setDetail] = useState<TreatmentProcedureRecord | null>(null);
-  const selectedPlan = patientPlans.find((plan) => plan.id === selectedPlanId);
   const selectedProcedure = selectedPlan?.procedures.find((procedure) => procedure.id === selectedProcedureId);
-  const records = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedPlanId);
+  const records = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedTreatmentPlanId);
   const draft: CreateProcedureRecordDto = {
     patientId: effectivePatientId,
-    treatmentPlanId: selectedPlanId,
+    treatmentPlanId: selectedTreatmentPlanId,
     procedureId: selectedProcedure?.id ?? "",
     procedureName: selectedProcedure?.name ?? "",
     tooth: selectedProcedure?.tooth ?? "",
@@ -44,6 +43,7 @@ export function TreatmentProcedureView() {
     notes,
   };
   const errors = hasAttemptedSubmit ? validateProcedureRecord(draft) : {};
+
   const columns: Column<TreatmentProcedureRecord>[] = [
     { key: "procedure", header: "Procedimiento", cell: (row) => <div className="cell-stack"><strong>{row.procedureName}</strong><small>{row.tooth ? `Pieza ${row.tooth}` : "Sin pieza específica"}</small></div> },
     { key: "date", header: "Fecha", cell: (row) => <div className="cell-stack"><span>{row.date}</span><small>{row.time}</small></div> },
@@ -54,7 +54,7 @@ export function TreatmentProcedureView() {
 
   const changePatient = (patientId: string) => {
     selectPatient(patientId);
-    setSelectedPlanId("");
+    selectTreatmentPlan("");
     setSelectedProcedureId("");
     setProfessional("");
     setHasAttemptedSubmit(false);
@@ -62,9 +62,10 @@ export function TreatmentProcedureView() {
   };
   const changePlan = (planId: string) => {
     const plan = patientPlans.find((item) => item.id === planId);
-    setSelectedPlanId(planId);
+    selectTreatmentPlan(planId);
     setSelectedProcedureId("");
     setProfessional(plan?.professional ?? "");
+    setNotes("");
     setHasAttemptedSubmit(false);
     setNotice("");
   };
@@ -90,7 +91,7 @@ export function TreatmentProcedureView() {
     </section>
     <section className={`card ${styles.budgetSelector}`}>
       <div><h3>Plan de tratamiento</h3><p>Selecciona el plan que contiene el procedimiento realizado.</p></div>
-      <label className="field"><span>Plan del paciente</span><select value={selectedPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
+      <label className="field"><span>Plan del paciente</span><select value={selectedTreatmentPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "El formulario y los procedimientos registrados aparecerán aquí." : "Crea primero un plan de tratamiento para este paciente."} /></section>}
     {selectedPlan && <>
