@@ -1,4 +1,4 @@
-export type AppointmentStatus = "Solicitada" | "Confirmada" | "En espera" | "En preparación" | "En atención" | "Atendida" | "Rechazada" | "No asistió";
+export type AppointmentStatus = "Solicitada" | "Confirmada" | "En espera" | "En preparación" | "En atención" | "Atendida" | "Cancelada" | "Rechazada" | "No asistió";
 
 export type Appointment = {
   id: string;
