@@ -42,7 +42,7 @@ export function PrivateLayout({ children }: { children: React.ReactNode }) {
               <Bell size={20} />
               <span className="notification-dot" />
             </button>
-            <div className="avatar" title="Daniel · Administrador"><UserRound size={19} /></div>
+            <div className="avatar" title={`Daniel · ${role}`}><UserRound size={19} /></div>
           </div>
         </header>
         <main className="main-content">{children}</main>

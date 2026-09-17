@@ -10,3 +10,4 @@ export * from "./ui/Button";
 export * from "./ui/PageHeader";
 export * from "./ui/StatCard";
 export * from "./feedback/ActionNotice";
+export * from "./feedback/RoleAccessNotice";

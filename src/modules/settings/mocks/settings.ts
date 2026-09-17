@@ -18,11 +18,11 @@ export const initialCatalog: CatalogItem[] = [
 ];
 
 export const initialPermissions: RolePermission[] = [
-  { role: "Administrador", modules: { Agenda: ["view","create","edit","deactivate","export"], Expediente: ["view","create","edit","export"], Tratamientos: ["view","create","edit","export"], Caja: ["view","create","edit","export"], Inventario: ["view","create","edit","deactivate","export"], Configuración: ["view","create","edit","deactivate","export"] } },
+  { role: "Administrador", modules: { Agenda: ["view","create","edit","deactivate","export"], Expediente: ["view","create","edit","export"], Tratamientos: ["view","create","edit","export"], Caja: ["view","create","edit","export"], Inventario: ["view","create","edit","deactivate","export"], Esterilización: ["view","create","edit","export"], Reportes: ["view","export"], Configuración: ["view","create","edit","deactivate","export"] } },
   { role: "Secretaría", modules: { Agenda: ["view","create","edit"], Expediente: [], Tratamientos: ["view"], Caja: ["view"], Inventario: [], Configuración: [] } },
-  { role: "Odontólogo", modules: { Agenda: ["view"], Expediente: ["view","create","edit","validate"], Tratamientos: ["view","create","edit","validate"], Caja: ["view"], Inventario: ["view"], Configuración: [] } },
-  { role: "Asistente", modules: { Agenda: ["view","edit"], Expediente: ["view","create","edit"], Tratamientos: ["view","edit"], Caja: [], Inventario: ["view","edit"], Configuración: [] } },
-  { role: "Cajero", modules: { Agenda: ["view"], Expediente: [], Tratamientos: ["view"], Caja: ["view","create","edit","export"], Inventario: [], Configuración: [] } },
+  { role: "Odontólogo", modules: { Agenda: ["view"], Expediente: ["view","create","edit","validate"], Tratamientos: ["view","create","edit","validate"], Caja: ["view"], Inventario: ["view"], Esterilización: [], Reportes: ["view","export"], Configuración: [] } },
+  { role: "Asistente", modules: { Agenda: ["view","edit"], Expediente: ["view","create","edit"], Tratamientos: ["view","edit"], Caja: [], Inventario: ["view","edit"], Esterilización: ["view","create","edit"], Reportes: [], Configuración: [] } },
+  { role: "Cajero", modules: { Agenda: ["view"], Expediente: [], Tratamientos: ["view"], Caja: ["view","create","edit","export"], Inventario: [], Esterilización: [], Reportes: ["view","export"], Configuración: [] } },
 ];
 
 export const initialAudit: AuditEntry[] = [

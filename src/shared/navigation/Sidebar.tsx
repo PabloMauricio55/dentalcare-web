@@ -3,10 +3,16 @@
 import { Activity, LogOut, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useApp } from "@/providers/AppProviders";
 import { navigation } from "@/shared/constants/navigation";
+import { roleAccess } from "@/shared/constants/role-access";
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
+  const { role } = useApp();
+  const visibleNavigation = navigation
+    .map((group) => ({ ...group, items: group.items.filter((item) => roleAccess.canAccessRoute(role, item.href)) }))
+    .filter((group) => group.items.length > 0);
   return (
     <>
       {open && <button className="sidebar-overlay" onClick={onClose} aria-label="Cerrar menú" />}
@@ -17,7 +23,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <button className="sidebar-close" onClick={onClose} aria-label="Cerrar menú"><X /></button>
         </div>
         <nav className="nav-groups">
-          {navigation.map((group) => (
+          {visibleNavigation.map((group) => (
             <div className="nav-group" key={group.label}>
               <p>{group.label}</p>
               {group.items.map((item) => {

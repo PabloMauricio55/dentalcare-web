@@ -3,7 +3,9 @@
 import { ClipboardCopy, ClipboardPlus, KeyRound, Pencil, Plus, Printer, RotateCcw, UserRound } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ActionNotice, Button, ConfirmDialog, DataTable, Modal, PageHeader, Pagination, SearchInput, StatusBadge, type Column } from "@/shared/components";
+import { ActionNotice, Button, ConfirmDialog, DataTable, Modal, PageHeader, Pagination, RoleAccessNotice, SearchInput, StatusBadge, type Column } from "@/shared/components";
+import { useApp } from "@/providers/AppProviders";
+import { roleAccess } from "@/shared/constants/role-access";
 import { useClinicSession } from "@/modules/appointments/components/ClinicSessionProvider";
 import { matchesPatient } from "../adapters/patient.adapter";
 import type { CreatePatientDto } from "../dtos/patient.dto";
@@ -46,6 +48,8 @@ function dtoFromForm(form: FormData): CreatePatientDto {
 
 export function PatientsView() {
   const router = useRouter();
+  const { role } = useApp();
+  const canManage = roleAccess.canManagePatients(role);
   const { patients, patientAccess, addPatient, updatePatient, createAccess, resetAccess, selectPatient } = useClinicSession();
   const [query, setQuery] = useState("");
   const [modal, setModal] = useState<"new" | "detail" | "edit" | "access" | null>(null);
@@ -180,7 +184,8 @@ export function PatientsView() {
   };
 
   return <>
-    <PageHeader title="Gestión de pacientes" description="La ficha administrativa reúne contacto, facturación y acceso; los antecedentes permanecen en Expediente clínico." actions={<Button onClick={() => { setError(""); setFormBirthDate(""); setModal("new"); }}><Plus size={17} /> Nuevo paciente</Button>} />
+    <PageHeader title="Gestión de pacientes" description="La ficha administrativa reúne contacto, facturación y acceso; los antecedentes permanecen en Expediente clínico." actions={canManage ? <Button onClick={() => { setError(""); setFormBirthDate(""); setModal("new"); }}><Plus size={17} /> Nuevo paciente</Button> : undefined} />
+    {!canManage && <RoleAccessNotice role={role}>Puedes consultar la ficha administrativa. Registrar pacientes, editar datos, gestionar accesos y agendar la primera cita corresponde a Secretaría o Administración.</RoleAccessNotice>}
     {notice && <ActionNotice message={notice} onClose={() => setNotice("")} />}
     <section className="card patient-search-card"><SearchInput value={query} onChange={(value) => { setQuery(value); setPage(1); }} placeholder="Buscar por nombre, DPI, teléfono, código, correo, ciudad o género..." /><span>{filtered.length} coincidencias</span></section>
     <section className="card"><DataTable columns={columns} rows={filtered.slice((page - 1) * 8, page * 8)} /><Pagination page={page} totalPages={Math.max(1, Math.ceil(filtered.length / 8))} onPageChange={setPage} /></section>
@@ -201,14 +206,14 @@ export function PatientsView() {
           <div className="full"><span>Dirección de facturación</span><strong>{active.billingAddress || "Sin registrar"}</strong></div>
           {active.guardianName && <><div><span>Responsable</span><strong>{active.guardianName}</strong></div><div><span>Parentesco y teléfono</span><strong>{active.guardianRelationship} · {active.guardianPhone}</strong></div></>}
         </div>
-        <div className="next-actions"><h4>Siguientes pasos</h4><div>
+        {canManage && <div className="next-actions"><h4>Siguientes pasos</h4><div>
           <Button variant="secondary" onClick={() => { setError(""); setFormBirthDate(active.birthDate); setModal("edit"); }}><Pencil size={16} /> Editar ficha</Button>
           {active.accessStatus === "Pendiente"
             ? <Button variant="secondary" onClick={handleCreateAccess}><KeyRound size={16} /> Crear acceso</Button>
             : <Button variant="secondary" onClick={() => setConfirmReset(true)}><RotateCcw size={16} /> Restablecer acceso</Button>}
           {credentials && <Button variant="secondary" onClick={() => setModal("access")}><KeyRound size={16} /> Ver credenciales</Button>}
           <Button onClick={scheduleFirstAppointment}><ClipboardPlus size={16} /> Agendar primera cita</Button>
-        </div></div>
+        </div></div>}
         <div className="clinical-warning"><UserRound size={19} /><p><strong>Antecedentes clínicos pendientes</strong><span>El paciente puede completarlos desde portal, app o formulario impreso. El asistente revisa y el odontólogo valida.</span></p></div>
       </div>}
     </Modal>
