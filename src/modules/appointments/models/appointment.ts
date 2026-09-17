@@ -12,4 +12,5 @@ export type Appointment = {
   source: "Portal" | "App" | "Clínica";
   requestedChange?: string;
   notes?: string;
+  arrivedAt?: string;
 };
