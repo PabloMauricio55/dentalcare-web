@@ -34,6 +34,7 @@ import {
   shiftDate,
   weekDates,
 } from "../services/agenda-date.service";
+import { appointmentScheduleService, type AppointmentSlot } from "../services/appointment-schedule.service";
 import { useClinicSession } from "./ClinicSessionProvider";
 import styles from "./agenda.module.css";
 
@@ -60,6 +61,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
   const [pendingStatus, setPendingStatus] = useState<AppointmentStatus | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [suggestedSlots, setSuggestedSlots] = useState<AppointmentSlot[]>([]);
 
   const professionals = useMemo(
     () => Array.from(new Set(appointments.map((item) => item.professional))).sort(),
@@ -67,7 +69,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
   );
   const calendarAppointments = useMemo(
     () => appointments
-      .filter((item) => !["Solicitada", "Rechazada"].includes(item.status))
+      .filter((item) => !["Solicitada", "Propuesta enviada", "Pendiente de respuesta", "Rechazada"].includes(item.status))
       .filter((item) => professional === "Todos" || item.professional === professional)
       .sort((left, right) => `${left.date}${left.time}`.localeCompare(`${right.date}${right.time}`)),
     [appointments, professional],
@@ -90,6 +92,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
   const openActions = (appointment: Appointment) => {
     setActive(appointment);
     setError("");
+    setSuggestedSlots([]);
     setModal("actions");
   };
 
@@ -108,7 +111,12 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       setError("Completa todos los campos obligatorios.");
       return;
     }
-    addAppointment(dto);
+    const result = addAppointment(dto);
+    if (!result.ok) {
+      setError(`El profesional ya tiene una cita que coincide con este horario. Elige otra hora.`);
+      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, dto));
+      return;
+    }
     setSelectedDate(dto.date);
     setModal(null);
     setError("");
@@ -127,7 +135,13 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       setError("Completa el motivo, profesional y una duración válida.");
       return;
     }
-    updateAppointment({ ...active, reason, professional: nextProfessional, duration, notes });
+    const nextAppointment = { ...active, reason, professional: nextProfessional, duration, notes };
+    const result = updateAppointment(nextAppointment);
+    if (!result.ok) {
+      setError("La duración o el profesional elegido se superpone con otra cita.");
+      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, nextAppointment, active.id));
+      return;
+    }
     setModal(null);
     setError("");
     setNotice("Los datos de la cita fueron actualizados.");
@@ -143,7 +157,12 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       setError("Selecciona la nueva fecha y hora.");
       return;
     }
-    rescheduleAppointment(active.id, date, time);
+    const result = rescheduleAppointment(active.id, date, time);
+    if (!result.ok) {
+      setError("El horario elegido se superpone con otra cita del mismo profesional.");
+      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, { ...active, date, time }, active.id));
+      return;
+    }
     setSelectedDate(date);
     setModal(null);
     setError("");
@@ -187,7 +206,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       <PageHeader
         title="Agenda general"
         description={`${viewLabels[view]} · ${description}`}
-        actions={<Button onClick={() => { setActive(null); setError(""); setModal("schedule"); }}><CalendarPlus size={17} /> Agendar cita</Button>}
+        actions={<Button onClick={() => { setActive(null); setError(""); setSuggestedSlots([]); setModal("schedule"); }}><CalendarPlus size={17} /> Agendar cita</Button>}
       />
       {notice && <ActionNotice message={notice} onClose={() => setNotice("")} />}
       <section className="card">
@@ -271,6 +290,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
           <label className="field"><span>Profesional *</span><select name="professional" defaultValue={professional === "Todos" ? professionals[0] : professional}>{professionals.map((item) => <option key={item}>{item}</option>)}</select></label>
           <label className="field full"><span>Motivo *</span><input name="reason" placeholder="Ej. Evaluación inicial" /></label>
           {error && <p className="form-error full">{error}</p>}
+          {!!suggestedSlots.length && <div className={`${styles.slotSuggestions} full`}><strong>Horarios disponibles cercanos</strong><div>{suggestedSlots.map((slot) => <span key={`${slot.date}-${slot.time}`}>{slot.time} · {slot.duration} min</span>)}</div><small>Selecciona uno de estos horarios en el campo de hora.</small></div>}
           <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal(null)}>Cancelar</Button><Button type="submit"><Clock3 size={17} /> Guardar cita</Button></div>
         </form>
       </Modal>
@@ -278,8 +298,8 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       <Modal open={modal === "actions" && !!active} title="Acciones de la cita" description={active ? `${patientName(active.patientId)} · ${active.date} ${active.time}` : ""} onClose={() => setModal(null)}>
         {active && <div className={styles.actionList}>
           <button onClick={() => setModal("detail")}><Eye size={17} /> Ver detalle completo</button>
-          <button onClick={() => { setError(""); setModal("edit"); }}><Pencil size={17} /> Editar información</button>
-          <button onClick={() => { setError(""); setModal("reschedule"); }}><CalendarClock size={17} /> Reprogramar fecha y hora</button>
+          <button onClick={() => { setError(""); setSuggestedSlots([]); setModal("edit"); }}><Pencil size={17} /> Editar información</button>
+          <button onClick={() => { setError(""); setSuggestedSlots([]); setModal("reschedule"); }}><CalendarClock size={17} /> Reprogramar fecha y hora</button>
           {active.status === "Confirmada" && <button onClick={() => requestStatusChange("En espera")}><DoorOpen size={17} /> Registrar llegada</button>}
           {!closedStatuses.includes(active.status) && active.status !== "Atendida" && <button className={styles.dangerAction} onClick={() => requestStatusChange("No asistió")}><UserX size={17} /> Marcar inasistencia</button>}
           {!closedStatuses.includes(active.status) && active.status !== "Atendida" && <button className={styles.dangerAction} onClick={() => requestStatusChange("Cancelada")}><Ban size={17} /> Cancelar cita</button>}
@@ -295,6 +315,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
           <div className={styles.fullDetail}><span>Motivo</span><strong>{active.reason}</strong></div>
           <div><span>Estado</span><StatusBadge status={active.status} /></div>
           <div><span>Origen</span><strong>{active.source}</strong></div>
+          {active.proposedDate && active.proposedTime && <div className={styles.fullDetail}><span>Horario propuesto al paciente</span><strong>{formatLongDate(active.proposedDate)} · {active.proposedTime}</strong></div>}
           {active.notes && <div className={styles.fullDetail}><span>Notas</span><strong>{active.notes}</strong></div>}
         </div>}
       </Modal>
@@ -315,6 +336,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
           <label className="field"><span>Nueva fecha *</span><input name="date" type="date" defaultValue={active.date} /></label>
           <label className="field"><span>Nueva hora *</span><input name="time" type="time" defaultValue={active.time} /></label>
           {error && <p className="form-error full">{error}</p>}
+          {!!suggestedSlots.length && <div className={`${styles.slotSuggestions} full`}><strong>Alternativas disponibles</strong><div>{suggestedSlots.map((slot) => <span key={`${slot.date}-${slot.time}`}>{slot.time}</span>)}</div><small>Usa una de estas horas para evitar la superposición.</small></div>}
           <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("actions")}>Cancelar</Button><Button type="submit">Confirmar reprogramación</Button></div>
         </form>}
       </Modal>
