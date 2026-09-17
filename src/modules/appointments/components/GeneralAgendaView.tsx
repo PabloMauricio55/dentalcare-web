@@ -43,7 +43,7 @@ type AgendaModal = "schedule" | "actions" | "detail" | "edit" | "reschedule" | n
 const viewLabels: Record<AgendaView, string> = { day: "Día", week: "Semana", month: "Mes" };
 const closedStatuses: AppointmentStatus[] = ["Cancelada", "No asistió", "Rechazada"];
 
-export function GeneralAgendaView() {
+export function GeneralAgendaView({ initialPatientId = "", openSchedule = false }: { initialPatientId?: string; openSchedule?: boolean }) {
   const {
     appointments,
     patients,
@@ -55,7 +55,7 @@ export function GeneralAgendaView() {
   const [selectedDate, setSelectedDate] = useState(DEMO_TODAY);
   const [view, setView] = useState<AgendaView>("day");
   const [professional, setProfessional] = useState("Todos");
-  const [modal, setModal] = useState<AgendaModal>(null);
+  const [modal, setModal] = useState<AgendaModal>(openSchedule ? "schedule" : null);
   const [active, setActive] = useState<Appointment | null>(null);
   const [pendingStatus, setPendingStatus] = useState<AppointmentStatus | null>(null);
   const [notice, setNotice] = useState("");
@@ -100,10 +100,11 @@ export function GeneralAgendaView() {
       patientId: String(data.get("patientId")),
       date: String(data.get("date")),
       time: String(data.get("time")),
+      duration: Number(data.get("duration")),
       professional: String(data.get("professional")),
       reason: String(data.get("reason")),
     };
-    if (Object.values(dto).some((value) => !value.trim())) {
+    if (!dto.patientId.trim() || !dto.date.trim() || !dto.time.trim() || !dto.professional.trim() || !dto.reason.trim() || dto.duration < 5) {
       setError("Completa todos los campos obligatorios.");
       return;
     }
@@ -263,10 +264,11 @@ export function GeneralAgendaView() {
 
       <Modal open={modal === "schedule"} title="Agendar cita" description="La cita se registra directamente como confirmada por la clínica." onClose={() => setModal(null)}>
         <form className="form-grid" onSubmit={submitNew}>
-          <label className="field full"><span>Paciente *</span><select name="patientId" defaultValue=""><option value="" disabled>Seleccionar paciente</option>{patients.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</select></label>
+          <label className="field full"><span>Paciente *</span><select name="patientId" defaultValue={initialPatientId}><option value="" disabled>Seleccionar paciente</option>{patients.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</select></label>
           <label className="field"><span>Fecha *</span><input name="date" type="date" defaultValue={selectedDate} /></label>
           <label className="field"><span>Hora *</span><input name="time" type="time" defaultValue="09:00" /></label>
-          <label className="field full"><span>Profesional *</span><select name="professional" defaultValue={professional === "Todos" ? professionals[0] : professional}>{professionals.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label className="field"><span>Duración *</span><select name="duration" defaultValue="45"><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">60 minutos</option><option value="90">90 minutos</option></select></label>
+          <label className="field"><span>Profesional *</span><select name="professional" defaultValue={professional === "Todos" ? professionals[0] : professional}>{professionals.map((item) => <option key={item}>{item}</option>)}</select></label>
           <label className="field full"><span>Motivo *</span><input name="reason" placeholder="Ej. Evaluación inicial" /></label>
           {error && <p className="form-error full">{error}</p>}
           <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal(null)}>Cancelar</Button><Button type="submit"><Clock3 size={17} /> Guardar cita</Button></div>
