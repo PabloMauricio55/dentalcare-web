@@ -7,4 +7,12 @@ export type CreatePatientDto = {
   email: string;
   city: string;
   address: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  billingName: string;
+  nit: string;
+  billingAddress: string;
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPhone: string;
 };

@@ -3,6 +3,6 @@ import type { Appointment } from "../models/appointment";
 
 export const appointmentService = {
   create(dto: ScheduleAppointmentDto): Appointment {
-    return { ...dto, id: `c${Date.now()}`, duration: 45, source: "Clínica", status: "Confirmada" };
+    return { ...dto, id: `c${Date.now()}`, source: "Clínica", status: "Confirmada" };
   },
 };

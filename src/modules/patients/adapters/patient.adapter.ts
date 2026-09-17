@@ -2,7 +2,7 @@ import type { CreatePatientDto } from "../dtos/patient.dto";
 import type { Patient } from "../models/patient";
 
 export function patientFromDto(dto: CreatePatientDto, sequence: number): Patient {
-  return { ...dto, id: `p${Date.now()}`, code: `PAC-${String(sequence).padStart(5, "0")}`, emergencyContact: "Pendiente", billingName: dto.name, nit: "CF", accessStatus: "Pendiente", lastVisit: "Sin visitas" };
+  return { ...dto, id: `p${Date.now()}`, code: `PAC-${String(sequence).padStart(5, "0")}`, accessStatus: "Pendiente", lastVisit: "Sin visitas" };
 }
 
 export function matchesPatient(patient: Patient, query: string) {

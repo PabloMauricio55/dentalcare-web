@@ -10,8 +10,13 @@ export type Patient = {
   city: string;
   address: string;
   emergencyContact: string;
+  emergencyPhone: string;
   billingName: string;
   nit: string;
+  billingAddress: string;
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPhone: string;
   accessStatus: "Activo" | "Pendiente" | "Bloqueado";
   lastVisit: string;
 };
