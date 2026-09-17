@@ -1,16 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useSyncExternalStore } from "react";
 import type { CatalogItemDto, CreateUserDto } from "../dtos/settings.dto";
 import type { AuditEntry, CatalogItem, ClinicData, RolePermission, StaffUser } from "../models/settings";
-import { initialAudit, initialCatalog, initialClinic, initialPermissions, initialUsers } from "../mocks/settings";
+import { initialCatalog, initialClinic, initialPermissions, initialUsers } from "../mocks/settings";
 import { settingsService } from "../services/settings.service";
+import { auditSessionService } from "../services/audit-session.service";
 
 type Value = { users: StaffUser[]; catalog: CatalogItem[]; clinic: ClinicData; permissions: RolePermission[]; audit: AuditEntry[]; addUser: (dto: CreateUserDto) => string; updateUser: (user: StaffUser) => void; toggleUser: (id: string) => void; setClinic: (data: ClinicData) => void; addCatalog: (dto: CatalogItemDto) => void; updateCatalog: (item: CatalogItem) => void; toggleCatalog: (id: string) => void; togglePermission: (role: string, module: string, permission: string) => void };
 const Context = createContext<Value | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [users,setUsers] = useState(initialUsers); const [catalog,setCatalog] = useState(initialCatalog); const [clinic,setClinic] = useState(initialClinic); const [permissions,setPermissions] = useState(initialPermissions); const [audit] = useState(initialAudit);
+  const [users,setUsers] = useState(initialUsers); const [catalog,setCatalog] = useState(initialCatalog); const [clinic,setClinic] = useState(initialClinic); const [permissions,setPermissions] = useState(initialPermissions); const audit = useSyncExternalStore(auditSessionService.subscribe, auditSessionService.getSnapshot, auditSessionService.getServerSnapshot);
   const addUser = (dto: CreateUserDto) => { setUsers((items) => [...items,settingsService.createUser(dto)]); return settingsService.temporaryPassword(); };
   const updateUser = (next: StaffUser) => setUsers((items) => items.map((item) => item.id === next.id ? next : item));
   const toggleUser = (id: string) => setUsers((items) => items.map((item) => item.id === id ? { ...item, status: item.status === "Activo" ? "Inactivo" : "Activo" } : item));

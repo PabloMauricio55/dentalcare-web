@@ -1,0 +1,115 @@
+.credentialCard {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff, #f1fbfb);
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+}
+
+.credentialHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.credentialHeader strong,
+.credentialHeader span {
+  display: block;
+}
+
+.credentialHeader span,
+.credentialCard small {
+  color: var(--muted);
+}
+
+.credentialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.credentialGrid div {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.credentialGrid span,
+.credentialGrid strong {
+  display: block;
+}
+
+.credentialGrid span {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.temporaryPassword {
+  color: #167c7c;
+  letter-spacing: 0.04em;
+}
+
+.instructions {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.signature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.signature div {
+  padding-top: 28px;
+  border-bottom: 1px solid #839393;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.previewActions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .credentialGrid,
+  .signature {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  :global(body *) {
+    visibility: hidden;
+  }
+
+  .credentialCard,
+  .credentialCard * {
+    visibility: visible;
+  }
+
+  .credentialCard {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    color: #1f2929;
+  }
+
+  .previewActions {
+    display: none;
+  }
+}
