@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
+import { useClinicSession } from "@/modules/appointments/components/ClinicSessionProvider";
 import type { CreateTreatmentPlanDto } from "@/modules/treatments/dtos/create-treatment-plan.dto";
 import type { CreateProcedureRecordDto } from "@/modules/treatments/dtos/create-procedure-record.dto";
 import type { FinalizeProcedureDto } from "@/modules/treatments/dtos/finalize-procedure.dto";
@@ -20,6 +21,8 @@ type TreatmentPlansContextValue = {
   procedureCompletions: ProcedureCompletion[];
   treatmentCharges: TreatmentCharge[];
   prescriptions: TreatmentPrescription[];
+  selectedTreatmentPlanId: string;
+  selectTreatmentPlan: (planId: string) => void;
   addPlan: (dto: CreateTreatmentPlanDto) => TreatmentPlan;
   approvePlan: (id: string) => void;
   generateBudget: (patientId: string, treatmentPlanId: string) => TreatmentBudget;
@@ -34,6 +37,7 @@ type TreatmentPlansContextValue = {
 const TreatmentPlansContext = createContext<TreatmentPlansContextValue | null>(null);
 
 export function TreatmentPlansProvider({ children }: { children: React.ReactNode }) {
+  const { patients, selectedPatientId } = useClinicSession();
   const [plans, setPlans] = useState(initialTreatmentPlans);
   const [budgets, setBudgets] = useState(initialTreatmentBudgets);
   const [consents, setConsents] = useState(initialTreatmentConsents);
@@ -41,6 +45,16 @@ export function TreatmentPlansProvider({ children }: { children: React.ReactNode
   const [procedureCompletions, setProcedureCompletions] = useState<ProcedureCompletion[]>([]);
   const [treatmentCharges, setTreatmentCharges] = useState<TreatmentCharge[]>([]);
   const [prescriptions, setPrescriptions] = useState<TreatmentPrescription[]>([]);
+  const [storedTreatmentPlanId, setStoredTreatmentPlanId] = useState("");
+  const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
+  const selectedTreatmentPlanId = plans.some((plan) => plan.id === storedTreatmentPlanId && plan.patientId === effectivePatientId)
+    ? storedTreatmentPlanId
+    : "";
+
+  const selectTreatmentPlan = (planId: string) => {
+    const validPlanId = planId && !plans.some((plan) => plan.id === planId && plan.patientId === effectivePatientId) ? "" : planId;
+    setStoredTreatmentPlanId(validPlanId);
+  };
   const addPlan = (dto: CreateTreatmentPlanDto) => {
     const plan = treatmentService.create(dto);
     setPlans((current) => [plan, ...current]);
@@ -92,7 +106,7 @@ export function TreatmentPlansProvider({ children }: { children: React.ReactNode
     setPrescriptions((current) => existing ? current.map((item) => item.id === existing.id ? prescription : item) : [prescription, ...current]);
     return prescription;
   };
-  return <TreatmentPlansContext.Provider value={{ plans, budgets, consents, procedureRecords, procedureCompletions, treatmentCharges, prescriptions, addPlan, approvePlan, generateBudget, approveBudget, ensureConsent, acceptConsent, addProcedureRecord, finalizeProcedure, savePrescription }}>{children}</TreatmentPlansContext.Provider>;
+  return <TreatmentPlansContext.Provider value={{ plans, budgets, consents, procedureRecords, procedureCompletions, treatmentCharges, prescriptions, selectedTreatmentPlanId, selectTreatmentPlan, addPlan, approvePlan, generateBudget, approveBudget, ensureConsent, acceptConsent, addProcedureRecord, finalizeProcedure, savePrescription }}>{children}</TreatmentPlansContext.Provider>;
 }
 
 export function useTreatmentPlans() {

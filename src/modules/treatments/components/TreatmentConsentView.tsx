@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, FileCheck2, UserRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useClinicSession } from "@/modules/appointments/components/ClinicSessionProvider";
 import type { TreatmentConsent } from "@/modules/treatments/models/treatment.model";
 import { treatmentService } from "@/modules/treatments/services/treatment.service";
@@ -12,26 +12,29 @@ import styles from "./treatments.module.css";
 
 export function TreatmentConsentView() {
   const { patients, selectedPatientId, selectPatient } = useClinicSession();
-  const { plans, consents, ensureConsent, acceptConsent } = useTreatmentPlans();
+  const { plans, consents, selectedTreatmentPlanId, selectTreatmentPlan, ensureConsent, acceptConsent } = useTreatmentPlans();
   const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
   const patient = patients.find((item) => item.id === effectivePatientId);
   const patientPlans = useMemo(() => plans.filter((plan) => plan.patientId === effectivePatientId), [effectivePatientId, plans]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<TreatmentConsent | null>(null);
   const [notice, setNotice] = useState("");
-  const selectedPlan = patientPlans.find((plan) => plan.id === selectedPlanId);
-  const selectedConsent = consents.find((consent) => consent.patientId === effectivePatientId && consent.treatmentPlanId === selectedPlanId);
+  const selectedPlan = patientPlans.find((plan) => plan.id === selectedTreatmentPlanId);
+  const selectedConsent = consents.find((consent) => consent.patientId === effectivePatientId && consent.treatmentPlanId === selectedTreatmentPlanId);
+
+  useEffect(() => {
+    if (selectedTreatmentPlanId) ensureConsent(effectivePatientId, selectedTreatmentPlanId);
+  }, [effectivePatientId, ensureConsent, selectedTreatmentPlanId]);
 
   const changePatient = (patientId: string) => {
     selectPatient(patientId);
-    setSelectedPlanId("");
+    selectTreatmentPlan("");
     setPreviewOpen(false);
     setConfirmation(null);
     setNotice("");
   };
   const changePlan = (planId: string) => {
-    setSelectedPlanId(planId);
+    selectTreatmentPlan(planId);
     setPreviewOpen(false);
     setConfirmation(null);
     setNotice("");
@@ -55,7 +58,7 @@ export function TreatmentConsentView() {
     </section>
     <section className={`card ${styles.budgetSelector}`}>
       <div><h3>Plan de tratamiento</h3><p>Selecciona el plan relacionado con el consentimiento.</p></div>
-      <label className="field"><span>Plan del paciente</span><select value={selectedPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
+      <label className="field"><span>Plan del paciente</span><select value={selectedTreatmentPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "El consentimiento y su previsualización aparecerán aquí." : "Crea primero un plan de tratamiento para este paciente."} /></section>}
     {selectedPlan && selectedConsent && <section className={`card ${styles.consentCard}`}>
