@@ -8,6 +8,7 @@ GitHub Issues es la fuente oficial. Este archivo registra el resultado de las ta
 | #4 | Agenda y gestión de pacientes | `feature/issue-4-agenda-pacientes` | #15 | Integrado en `develop` |
 | #5 | Usuarios, roles, clínica y auditoría | `feature/issue-5-configuracion` | #16 | Integrado en `develop` |
 | #31 | Calendario, filtros y acciones de citas interactivos | `feature/issue-31-agenda-interactiva` | #41 | Integrado en `develop` |
-| #32 | Ficha administrativa y primera cita | `feature/issue-32-ficha-primera-cita` | #52 | Listo para revisión |
+| #32 | Ficha administrativa y primera cita | `feature/issue-32-ficha-primera-cita` | #52 | Integrado en `develop` |
+| #33 | Creación y restablecimiento de acceso del paciente | `feature/issue-33-acceso-paciente` | Pendiente | Implementado localmente |
 
 Antes de iniciar una tarea nueva se debe consultar su Issue actualizado, crear una rama independiente desde `develop` y respetar `SCOPE.md`.

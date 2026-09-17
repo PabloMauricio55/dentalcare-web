@@ -1,15 +1,18 @@
 "use client";
 
-import { ClipboardPlus, KeyRound, Pencil, Plus, UserRound } from "lucide-react";
+import { ClipboardCopy, ClipboardPlus, KeyRound, Pencil, Plus, Printer, RotateCcw, UserRound } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ActionNotice, Button, DataTable, Modal, PageHeader, Pagination, SearchInput, StatusBadge, type Column } from "@/shared/components";
+import { ActionNotice, Button, ConfirmDialog, DataTable, Modal, PageHeader, Pagination, SearchInput, StatusBadge, type Column } from "@/shared/components";
 import { useClinicSession } from "@/modules/appointments/components/ClinicSessionProvider";
 import { matchesPatient } from "../adapters/patient.adapter";
 import type { CreatePatientDto } from "../dtos/patient.dto";
 import type { Patient } from "../models/patient";
 import { isMinor, validatePatient } from "../validation/patient.validation";
 import { PatientSummary } from "./PatientSummary";
+import type { PatientAccessCredentials } from "../models/patient-access";
+import { auditSessionService } from "@/modules/settings/services/audit-session.service";
+import accessStyles from "./patient-access.module.css";
 
 const emptyPatient: CreatePatientDto = {
   name: "", dpi: "", birthDate: "", gender: "Femenino", phone: "", email: "", city: "", address: "",
@@ -43,18 +46,21 @@ function dtoFromForm(form: FormData): CreatePatientDto {
 
 export function PatientsView() {
   const router = useRouter();
-  const { patients, addPatient, updatePatient, createAccess, selectPatient } = useClinicSession();
+  const { patients, patientAccess, addPatient, updatePatient, createAccess, resetAccess, selectPatient } = useClinicSession();
   const [query, setQuery] = useState("");
-  const [modal, setModal] = useState<"new" | "detail" | "edit" | null>(null);
+  const [modal, setModal] = useState<"new" | "detail" | "edit" | "access" | null>(null);
   const [active, setActive] = useState<Patient | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [formBirthDate, setFormBirthDate] = useState("");
+  const [credentials, setCredentials] = useState<PatientAccessCredentials | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
   const filtered = useMemo(() => patients.filter((patient) => matchesPatient(patient, query)), [patients, query]);
 
   const openDetail = (patient: Patient) => {
     setActive(patient);
+    setCredentials(patientAccess[patient.id] ?? null);
     selectPatient(patient.id);
     setModal("detail");
   };
@@ -98,6 +104,50 @@ export function PatientsView() {
     selectPatient(active.id);
     setModal(null);
     router.push(`/agenda/general?patientId=${encodeURIComponent(active.id)}&firstAppointment=1`);
+  };
+
+  const registerAudit = (patient: Patient, operation: PatientAccessCredentials["operation"]) => {
+    auditSessionService.recordPatientAccess(patient.code, patient.name, operation);
+  };
+
+  const handleCreateAccess = () => {
+    if (!active) return;
+    const generated = createAccess(active.id);
+    if (!generated) {
+      setNotice("El paciente ya tiene acceso. Utiliza Restablecer acceso para generar credenciales nuevas.");
+      return;
+    }
+    setActive({ ...active, accessStatus: "Activo" });
+    setCredentials(generated);
+    registerAudit(active, "Creación");
+    setModal("access");
+    setNotice("Acceso creado. Entrega las credenciales temporales al paciente.");
+  };
+
+  const handleResetAccess = () => {
+    if (!active) return;
+    const generated = resetAccess(active.id);
+    setConfirmReset(false);
+    if (!generated) {
+      setNotice("Primero debes crear el acceso del paciente.");
+      return;
+    }
+    setActive({ ...active, accessStatus: "Activo" });
+    setCredentials(generated);
+    registerAudit(active, "Restablecimiento");
+    setModal("access");
+    setNotice("Acceso restablecido. Las credenciales temporales anteriores dejaron de ser válidas en esta simulación.");
+  };
+
+  const copyCredentials = async () => {
+    if (!active || !credentials) return;
+    const content = `DentalCare\nPaciente: ${active.name}\nUsuario: ${credentials.username}\nContraseña temporal: ${credentials.temporaryPassword}\nDebe cambiarla en su primer ingreso.`;
+    try {
+      await navigator.clipboard.writeText(content);
+      setNotice("Credenciales copiadas al portapapeles.");
+    } catch {
+      setNotice("No fue posible copiar automáticamente. Puedes seleccionar los datos de la presentación.");
+    }
   };
 
   const fields = (value: CreatePatientDto | Patient = emptyPatient) => {
@@ -153,7 +203,10 @@ export function PatientsView() {
         </div>
         <div className="next-actions"><h4>Siguientes pasos</h4><div>
           <Button variant="secondary" onClick={() => { setError(""); setFormBirthDate(active.birthDate); setModal("edit"); }}><Pencil size={16} /> Editar ficha</Button>
-          <Button variant="secondary" onClick={() => { const password = createAccess(active.id); setActive({ ...active, accessStatus: "Activo" }); setNotice(`Acceso creado. Contraseña temporal: ${password}`); }}><KeyRound size={16} /> Crear acceso</Button>
+          {active.accessStatus === "Pendiente"
+            ? <Button variant="secondary" onClick={handleCreateAccess}><KeyRound size={16} /> Crear acceso</Button>
+            : <Button variant="secondary" onClick={() => setConfirmReset(true)}><RotateCcw size={16} /> Restablecer acceso</Button>}
+          {credentials && <Button variant="secondary" onClick={() => setModal("access")}><KeyRound size={16} /> Ver credenciales</Button>}
           <Button onClick={scheduleFirstAppointment}><ClipboardPlus size={16} /> Agendar primera cita</Button>
         </div></div>
         <div className="clinical-warning"><UserRound size={19} /><p><strong>Antecedentes clínicos pendientes</strong><span>El paciente puede completarlos desde portal, app o formulario impreso. El asistente revisa y el odontólogo valida.</span></p></div>
@@ -163,5 +216,21 @@ export function PatientsView() {
     <Modal open={modal === "edit" && !!active} title="Editar ficha administrativa" onClose={() => setModal("detail")}>
       <form className="form-grid" onSubmit={submitEdit}>{active && fields(active)}{error && <p className="form-error full">{error}</p>}<div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("detail")}>Cancelar</Button><Button type="submit">Guardar cambios</Button></div></form>
     </Modal>
+
+    <Modal open={modal === "access" && !!active && !!credentials} title="Entrega de acceso al paciente" description="Presentación imprimible de credenciales temporales simuladas." onClose={() => setModal("detail")}>
+      {active && credentials && <div className={accessStyles.credentialCard}>
+        <div className={accessStyles.credentialHeader}><div><strong>DentalCare Clínica Odontológica</strong><span>Acceso al portal y aplicación del paciente</span></div><small>{credentials.generatedAt}</small></div>
+        <div><strong>{active.name}</strong><small>{active.code} · {credentials.operation} de acceso</small></div>
+        <div className={accessStyles.credentialGrid}>
+          <div><span>Usuario</span><strong>{credentials.username}</strong></div>
+          <div><span>Contraseña temporal</span><strong className={accessStyles.temporaryPassword}>{credentials.temporaryPassword}</strong></div>
+        </div>
+        <div><strong>Indicaciones para el paciente</strong><ol className={accessStyles.instructions}><li>Ingresa al portal o aplicación con estas credenciales.</li><li>Cambia la contraseña temporal durante el primer ingreso.</li><li>No compartas la contraseña con otras personas.</li><li>Si pierdes el acceso, solicita un restablecimiento en recepción.</li></ol></div>
+        <div className={accessStyles.signature}><div>Firma de quien entrega</div><div>Firma del paciente o responsable</div></div>
+        <div className={accessStyles.previewActions}><Button variant="secondary" onClick={copyCredentials}><ClipboardCopy size={16} /> Copiar credenciales</Button><Button onClick={() => window.print()}><Printer size={16} /> Imprimir entrega</Button></div>
+      </div>}
+    </Modal>
+
+    <ConfirmDialog open={confirmReset} title="Restablecer acceso" message="Se generarán un usuario y una contraseña temporal nuevos. Las credenciales temporales anteriores dejarán de utilizarse en esta simulación." confirmLabel="Restablecer acceso" danger onClose={() => setConfirmReset(false)} onConfirm={handleResetAccess} />
   </>;
 }
