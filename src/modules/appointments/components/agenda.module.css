@@ -204,6 +204,42 @@
   margin: 0 0 9px auto;
 }
 
+.slotSuggestions {
+  background: #f0fbf9;
+  border: 1px solid #b7e2dd;
+  border-radius: 9px;
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+}
+
+.slotSuggestions strong,
+.slotSuggestions small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.slotSuggestions div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.slotSuggestions span,
+.slotSuggestions button {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--teal-dark);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 9px;
+}
+
+.slotSuggestions button:hover {
+  border-color: var(--teal);
+}
+
 @media (max-width: 700px) {
   .detailGrid {
     grid-template-columns: 1fr;

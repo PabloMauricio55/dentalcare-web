@@ -1,4 +1,4 @@
-import type { Appointment } from "../models/appointment";
+import type { Appointment, AppointmentAuditEntry } from "../models/appointment";
 
 export const initialAppointments: Appointment[] = [
   { id: "c1", patientId: "p1", date: "2026-09-10", time: "08:00", duration: 45, professional: "Dra. Elena Castillo", reason: "Evaluación inicial", status: "En atención", source: "Clínica" },
@@ -8,3 +8,13 @@ export const initialAppointments: Appointment[] = [
   { id: "c5", patientId: "p1", date: "2026-09-12", time: "14:00", duration: 45, professional: "Dra. Elena Castillo", reason: "Solicita control por dolor", status: "Solicitada", source: "App", requestedChange: "Prefiere horario después de las 14:00" },
   { id: "c6", patientId: "p3", date: "2026-09-13", time: "09:30", duration: 30, professional: "Dr. Mario Morales", reason: "Reprogramar control", status: "Solicitada", source: "Portal", requestedChange: "No puede asistir el viernes" },
 ];
+
+export const initialAppointmentAudit: AppointmentAuditEntry[] = initialAppointments.map((appointment, index) => ({
+  id: `audit-initial-${appointment.id}`,
+  appointmentId: appointment.id,
+  patientId: appointment.patientId,
+  occurredAt: `2026-09-09T${String(8 + index).padStart(2, "0")}:00:00-06:00`,
+  action: appointment.status === "Solicitada" ? "Solicitud recibida" : "Cita registrada",
+  toStatus: appointment.status,
+  detail: `${appointment.date} ${appointment.time} · ${appointment.professional}`,
+}));
