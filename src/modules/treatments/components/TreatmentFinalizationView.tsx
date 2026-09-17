@@ -18,19 +18,18 @@ const emptyMaterial = (key: number): MaterialDraft => ({ key, name: "", quantity
 
 export function TreatmentFinalizationView() {
   const { patients, selectedPatientId, selectPatient } = useClinicSession();
-  const { plans, procedureRecords, procedureCompletions, treatmentCharges, finalizeProcedure } = useTreatmentPlans();
+  const { plans, procedureRecords, procedureCompletions, treatmentCharges, selectedTreatmentPlanId, selectTreatmentPlan, finalizeProcedure } = useTreatmentPlans();
   const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
   const patient = patients.find((item) => item.id === effectivePatientId);
   const patientPlans = useMemo(() => plans.filter((plan) => plan.patientId === effectivePatientId), [effectivePatientId, plans]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedRecordId, setSelectedRecordId] = useState("");
   const [materials, setMaterials] = useState<MaterialDraft[]>([emptyMaterial(1)]);
   const [nextMaterialKey, setNextMaterialKey] = useState(2);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [notice, setNotice] = useState("");
-  const selectedPlan = patientPlans.find((plan) => plan.id === selectedPlanId);
-  const planRecords = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedPlanId);
+  const selectedPlan = patientPlans.find((plan) => plan.id === selectedTreatmentPlanId);
+  const planRecords = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedTreatmentPlanId);
   const availableRecords = planRecords.filter((record) => record.status === "Registrado");
   const selectedRecord = planRecords.find((record) => record.id === selectedRecordId);
   const selectedProcedure = selectedPlan?.procedures.find((procedure) => procedure.id === selectedRecord?.procedureId);
@@ -44,7 +43,7 @@ export function TreatmentFinalizationView() {
   }));
   const draft = {
     patientId: effectivePatientId,
-    treatmentPlanId: selectedPlanId,
+    treatmentPlanId: selectedTreatmentPlanId,
     procedureRecordId: selectedRecordId,
     description: selectedRecord?.procedureName ?? "",
     amount: selectedProcedure ? treatmentService.procedureSubtotal(selectedProcedure) : 0,
@@ -62,11 +61,11 @@ export function TreatmentFinalizationView() {
   };
   const changePatient = (patientId: string) => {
     selectPatient(patientId);
-    setSelectedPlanId("");
+    selectTreatmentPlan("");
     resetSelection();
   };
   const changePlan = (planId: string) => {
-    setSelectedPlanId(planId);
+    selectTreatmentPlan(planId);
     resetSelection();
   };
   const changeRecord = (recordId: string) => {
@@ -114,7 +113,7 @@ export function TreatmentFinalizationView() {
       <label className="compact-field"><span>Cambiar paciente</span><select value={effectivePatientId} onChange={(event) => changePatient(event.target.value)}>{patients.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.code}</option>)}</select></label>
     </section>
     <section className={`card ${styles.finalizationSelectors}`}>
-      <label className="field"><span>Plan de tratamiento</span><select value={selectedPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
+      <label className="field"><span>Plan de tratamiento</span><select value={selectedTreatmentPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
       <label className="field"><span>Procedimiento registrado</span><select value={selectedRecordId} disabled={!selectedPlan} aria-invalid={Boolean(errors.procedure)} onChange={(event) => changeRecord(event.target.value)}><option value="">Seleccionar procedimiento</option>{planRecords.map((record) => <option key={record.id} value={record.id}>{record.procedureName}{record.tooth ? ` · Pieza ${record.tooth}` : ""} · {record.status}</option>)}</select>{errors.procedure && <small className={styles.fieldError}>{errors.procedure}</small>}</label>
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "Los procedimientos registrados aparecerán aquí." : "Este paciente todavía no tiene planes de tratamiento."} /></section>}

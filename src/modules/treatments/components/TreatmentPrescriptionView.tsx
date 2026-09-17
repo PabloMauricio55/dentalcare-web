@@ -24,11 +24,10 @@ const formatFriendlyDate = (date: string) => new Intl.DateTimeFormat("es-GT", {
 
 export function TreatmentPrescriptionView() {
   const { patients, selectedPatientId, selectPatient } = useClinicSession();
-  const { plans, procedureRecords, treatmentCharges, prescriptions, savePrescription } = useTreatmentPlans();
+  const { plans, procedureRecords, treatmentCharges, prescriptions, selectedTreatmentPlanId, selectTreatmentPlan, savePrescription } = useTreatmentPlans();
   const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
   const patient = patients.find((item) => item.id === effectivePatientId);
   const patientPlans = useMemo(() => plans.filter((plan) => plan.patientId === effectivePatientId), [effectivePatientId, plans]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedRecordId, setSelectedRecordId] = useState("");
   const [instructions, setInstructions] = useState(emptyInstructions);
   const [medications, setMedications] = useState<MedicationDraft[]>([emptyMedication(1)]);
@@ -36,15 +35,15 @@ export function TreatmentPrescriptionView() {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [notice, setNotice] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
-  const selectedPlan = patientPlans.find((plan) => plan.id === selectedPlanId);
-  const finalizedRecords = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedPlanId && record.status === "Finalizado");
+  const selectedPlan = patientPlans.find((plan) => plan.id === selectedTreatmentPlanId);
+  const finalizedRecords = procedureRecords.filter((record) => record.patientId === effectivePatientId && record.treatmentPlanId === selectedTreatmentPlanId && record.status === "Finalizado");
   const selectedRecord = finalizedRecords.find((record) => record.id === selectedRecordId);
   const savedPrescription = prescriptions.find((prescription) => prescription.procedureRecordId === selectedRecordId);
   const charge = treatmentCharges.find((item) => item.procedureRecordId === selectedRecordId);
   const medicationDtos = medications.map((medication) => ({ name: medication.name, dose: medication.dose, frequency: medication.frequency, duration: medication.duration, notes: medication.notes }));
   const draft = {
     patientId: effectivePatientId,
-    treatmentPlanId: selectedPlanId,
+    treatmentPlanId: selectedTreatmentPlanId,
     procedureRecordId: selectedRecordId,
     professional: selectedRecord?.professional ?? "",
     instructions,
@@ -63,11 +62,11 @@ export function TreatmentPrescriptionView() {
   };
   const changePatient = (patientId: string) => {
     selectPatient(patientId);
-    setSelectedPlanId("");
+    selectTreatmentPlan("");
     resetForm();
   };
   const changePlan = (planId: string) => {
-    setSelectedPlanId(planId);
+    selectTreatmentPlan(planId);
     resetForm();
   };
   const changeRecord = (recordId: string) => {
@@ -109,7 +108,7 @@ export function TreatmentPrescriptionView() {
       <label className="compact-field"><span>Cambiar paciente</span><select value={effectivePatientId} onChange={(event) => changePatient(event.target.value)}>{patients.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.code}</option>)}</select></label>
     </section>
     <section className={`card ${styles.finalizationSelectors}`}>
-      <label className="field"><span>Plan de tratamiento</span><select value={selectedPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
+      <label className="field"><span>Plan de tratamiento</span><select value={selectedTreatmentPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
       <label className="field"><span>Procedimiento finalizado</span><select value={selectedRecordId} disabled={!selectedPlan} aria-invalid={Boolean(errors.procedure)} onChange={(event) => changeRecord(event.target.value)}><option value="">Seleccionar procedimiento</option>{finalizedRecords.map((record) => <option key={record.id} value={record.id}>{record.procedureName}{record.tooth ? ` · Pieza ${record.tooth}` : ""} · Finalizado</option>)}</select>{errors.procedure && <small className={styles.fieldError}>{errors.procedure}</small>}</label>
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "Los procedimientos finalizados aparecerán aquí." : "Este paciente todavía no tiene planes de tratamiento."} /></section>}

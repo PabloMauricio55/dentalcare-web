@@ -12,16 +12,15 @@ import styles from "./treatments.module.css";
 
 export function TreatmentBudgetView() {
   const { patients, selectedPatientId, selectPatient } = useClinicSession();
-  const { plans, budgets, generateBudget, approveBudget } = useTreatmentPlans();
+  const { plans, budgets, selectedTreatmentPlanId, selectTreatmentPlan, generateBudget, approveBudget } = useTreatmentPlans();
   const effectivePatientId = selectedPatientId ?? patients[0]?.id ?? "";
   const patient = patients.find((item) => item.id === effectivePatientId);
   const patientPlans = useMemo(() => plans.filter((plan) => plan.patientId === effectivePatientId), [effectivePatientId, plans]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [approval, setApproval] = useState<TreatmentBudget | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const selectedPlan = patientPlans.find((plan) => plan.id === selectedPlanId);
-  const selectedBudget = budgets.find((budget) => budget.patientId === effectivePatientId && budget.treatmentPlanId === selectedPlanId);
+  const selectedPlan = patientPlans.find((plan) => plan.id === selectedTreatmentPlanId);
+  const selectedBudget = budgets.find((budget) => budget.patientId === effectivePatientId && budget.treatmentPlanId === selectedTreatmentPlanId);
   const total = selectedPlan ? treatmentService.planTotal(selectedPlan.procedures) : 0;
   const columns: Column<TreatmentProcedure>[] = [
     { key: "procedure", header: "Procedimiento", cell: (row) => <strong>{row.name}</strong> },
@@ -33,12 +32,12 @@ export function TreatmentBudgetView() {
 
   const changePatient = (patientId: string) => {
     selectPatient(patientId);
-    setSelectedPlanId("");
+    selectTreatmentPlan("");
     setError("");
     setNotice("");
   };
   const changePlan = (planId: string) => {
-    setSelectedPlanId(planId);
+    selectTreatmentPlan(planId);
     setError("");
     setNotice("");
   };
@@ -69,7 +68,7 @@ export function TreatmentBudgetView() {
     </section>
     <section className={`card ${styles.budgetSelector}`}>
       <div><h3>Plan de tratamiento</h3><p>Selecciona el plan que dará origen al presupuesto.</p></div>
-      <label className="field"><span>Plan del paciente</span><select value={selectedPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
+      <label className="field"><span>Plan del paciente</span><select value={selectedTreatmentPlanId} onChange={(event) => changePlan(event.target.value)}><option value="">Seleccionar plan</option>{patientPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · {plan.status} · {formatCurrency(treatmentService.planTotal(plan.procedures))}</option>)}</select></label>
       {error && <p className={`form-error ${styles.budgetError}`}>{error}</p>}
     </section>
     {!selectedPlan && <section className="card"><EmptyState title={patientPlans.length ? "Selecciona un plan" : "Sin planes disponibles"} description={patientPlans.length ? "El detalle y las acciones del presupuesto aparecerán aquí." : "Crea primero un plan de tratamiento para este paciente."} /></section>}
