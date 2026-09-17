@@ -1,2 +1,5 @@
-import { ModulePlaceholder } from "@/shared/components/ui/ModulePlaceholder";
-export default function Page() { return <ModulePlaceholder title="Expediente clínico" description="Historia clínica, odontograma y diagnósticos." issue="ticket #6" />; }
+import { ClinicalRecordsPatientList } from "@/modules/clinical-records/components/ClinicalRecordsPatientList";
+
+export default function Page() {
+	return <ClinicalRecordsPatientList />;
+}
