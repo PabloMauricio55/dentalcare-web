@@ -12,6 +12,7 @@ GitHub Issues es la fuente oficial. Este archivo registra el resultado de las ta
 | #33 | Creación y restablecimiento de acceso del paciente | `feature/issue-33-acceso-paciente` | #54 | Integrado en `develop` |
 | #34 | Conexión de Sala de espera y Atenciones con el flujo clínico | `feature/issue-34-flujo-clinico` | #56 | Integrado en `develop` |
 | #35 | Roles visuales y responsive de gestión | `feature/issue-35-roles-responsive` | #58 | Integrado en `develop` |
-| #36 | Validaciones, reprogramación y exportaciones de citas | `feature/issue-36-validaciones-citas` | #59 | Listo para revisión |
+| #36 | Validaciones, reprogramación y exportaciones de citas | `feature/issue-36-validaciones-citas` | #59 | Integrado en `develop` |
+| #37 | Usuarios, auditoría, permisos y catálogos | `feature/issue-37-settings-validaciones` | #60 | Listo para revisión |
 
 Antes de iniciar una tarea nueva se debe consultar su Issue actualizado, crear una rama independiente desde `develop` y respetar `SCOPE.md`.

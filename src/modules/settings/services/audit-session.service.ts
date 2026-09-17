@@ -39,6 +39,25 @@ function auditTimestamp() {
   return `${date} ${time}`;
 }
 
+function recordEntry(entry: Omit<AuditEntry, "id" | "date" | "origin"> & { origin?: string }) {
+  const current = readSessionEvents();
+  const next: AuditEntry = {
+    ...entry,
+    id: `audit-${Date.now()}-${current.length}`,
+    date: auditTimestamp(),
+    origin: entry.origin ?? "Sesión local",
+  };
+  sessionEvents = [next, ...current];
+  window.__dentalCareAuditEvents = sessionEvents;
+  snapshot = [...sessionEvents, ...initialAudit];
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessionEvents));
+  } catch {
+    // El registro continúa disponible en memoria durante la navegación actual.
+  }
+  listeners.forEach((listener) => listener());
+}
+
 export const auditSessionService = {
   subscribe(listener: () => void) {
     listeners.add(listener);
@@ -51,25 +70,16 @@ export const auditSessionService = {
   getServerSnapshot() {
     return initialAudit;
   },
+  record(entry: Omit<AuditEntry, "id" | "date" | "origin"> & { origin?: string }) {
+    recordEntry(entry);
+  },
   recordPatientAccess(patientCode: string, patientName: string, operation: "Creación" | "Restablecimiento") {
-    const current = readSessionEvents();
-    const entry: AuditEntry = {
-      id: `access-${Date.now()}`,
-      date: auditTimestamp(),
+    recordEntry({
       user: "Daniel Sajche",
       action: operation === "Creación" ? "CREÓ ACCESO PACIENTE" : "RESTABLECIÓ ACCESO PACIENTE",
       module: "Pacientes",
       detail: `${patientCode} · ${patientName}`,
       origin: "Sesión local",
-    };
-    sessionEvents = [entry, ...current];
-    window.__dentalCareAuditEvents = sessionEvents;
-    snapshot = [...sessionEvents, ...initialAudit];
-    try {
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessionEvents));
-    } catch {
-      // El registro continúa disponible en memoria durante la navegación actual.
-    }
-    listeners.forEach((listener) => listener());
+    });
   },
 };
