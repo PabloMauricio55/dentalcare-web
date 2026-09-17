@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Button, EmptyState } from "@/shared/components";
 import { AppointmentRequest, PatientAppointment } from "../data/appointments.mock";
 import { usePatientAppointments } from "../hooks/usePatientAppointments";
+import { BudgetsView, TreatmentsView } from "./TreatmentsBudgetsView";
 import styles from "./patient-portal.module.css";
 
 type Section = "summary" | "appointments" | "treatments" | "estimates" | "prescriptions" | "checkups" | "account" | "documents" | "health" | "profile";
@@ -34,9 +35,9 @@ export function PatientPortalDashboard() {
   const [confirmed, setConfirmed] = useState(false);
   const [notice, setNotice] = useState("");
   const appointmentStore = usePatientAppointments();
-  const section: Section = pathname.endsWith("/citas") ? "appointments" : pathname.endsWith("/controles") ? "checkups" : preview;
+  const section: Section = pathname.endsWith("/citas") ? "appointments" : pathname.endsWith("/controles") ? "checkups" : pathname.endsWith("/tratamientos") ? "treatments" : pathname.endsWith("/presupuestos") ? "estimates" : preview;
   const isSummary = section === "summary";
-  const title = section === "appointments" ? "Mis citas" : section === "checkups" ? "Próximos controles" : isSummary ? "Resumen" : "Próximamente";
+  const title = section === "appointments" ? "Mis citas" : section === "checkups" ? "Próximos controles" : section === "treatments" ? "Tratamientos" : section === "estimates" ? "Presupuestos" : isSummary ? "Resumen" : "Próximamente";
   const notify = (message: string) => setNotice(message);
   const select = (item: Section) => { setPreview(item); setMenuOpen(false); };
 
@@ -44,14 +45,14 @@ export function PatientPortalDashboard() {
     {menuOpen && <button className={styles.overlay} type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
     <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ""}`} aria-label="Navegación del portal">
       <div className={styles.brandRow}><Link href="/" className={styles.brand}><HeartPulse size={21} aria-hidden="true" />DentalCare</Link><button type="button" className={styles.close} aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}><X size={20} /></button></div>
-      <nav>{navItems.map(({ id, label, icon: Icon }) => id === "summary" || id === "appointments" || id === "checkups" ? <Link key={id} href={id === "summary" ? "/portal" : id === "appointments" ? "/portal/citas" : "/portal/controles"} className={section === id ? styles.active : ""} aria-current={section === id ? "page" : undefined} onClick={() => setMenuOpen(false)}><Icon size={18} aria-hidden="true" /><span>{label}</span></Link> : <button key={id} type="button" className={section === id ? styles.active : ""} onClick={() => select(id)}><Icon size={18} aria-hidden="true" /><span>{label}</span><small>Próximamente</small></button>)}</nav>
+      <nav>{navItems.map(({ id, label, icon: Icon }) => id === "summary" || id === "appointments" || id === "checkups" || id === "treatments" || id === "estimates" ? <Link key={id} href={id === "summary" ? "/portal" : id === "appointments" ? "/portal/citas" : id === "checkups" ? "/portal/controles" : id === "treatments" ? "/portal/tratamientos" : "/portal/presupuestos"} className={section === id ? styles.active : ""} aria-current={section === id ? "page" : undefined} onClick={() => setMenuOpen(false)}><Icon size={18} aria-hidden="true" /><span>{label}</span></Link> : <button key={id} type="button" className={section === id ? styles.active : ""} onClick={() => select(id)}><Icon size={18} aria-hidden="true" /><span>{label}</span><small>Próximamente</small></button>)}</nav>
       <div className={styles.sidebarFooter}><button type="button" onClick={() => select("profile")}><UserRound size={18} aria-hidden="true" /><span>Perfil</span><small>Próximamente</small></button><Link href="/login"><LogOut size={18} aria-hidden="true" />Cerrar sesión</Link></div>
     </aside>
     <div className={styles.body}>
       <header><button type="button" className={styles.menu} aria-label="Abrir menú" onClick={() => setMenuOpen(true)}><Menu size={21} /></button><div><small>Portal del paciente</small><strong>{title}</strong></div><div className={styles.identity}><span><strong>{patient.name}</strong><small>{patient.since}</small></span><b aria-hidden="true">{patient.initials}</b></div></header>
       <main>
         {notice && <div className={styles.notice} role="status"><CheckCircle2 size={18} aria-hidden="true" /><span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Cerrar aviso">×</button></div>}
-        {section === "appointments" ? <Appointments notify={notify} store={appointmentStore} /> : section === "checkups" ? <Controls notify={notify} store={appointmentStore} /> : !isSummary ? <section className={styles.coming}><span><CalendarPlus size={30} aria-hidden="true" /></span><h1>Esta sección estará disponible próximamente</h1><p>Por ahora puedes consultar el resumen de tu atención.</p><Button type="button" onClick={() => select("summary")}>Volver al resumen</Button></section> : <Summary appointment={appointmentStore.appointments[0]} confirmed={confirmed} notify={notify} onConfirm={() => setConfirmed(true)} />}
+        {section === "appointments" ? <Appointments notify={notify} store={appointmentStore} /> : section === "checkups" ? <Controls notify={notify} store={appointmentStore} /> : section === "treatments" ? <TreatmentsView /> : section === "estimates" ? <BudgetsView notify={notify} /> : !isSummary ? <section className={styles.coming}><span><CalendarPlus size={30} aria-hidden="true" /></span><h1>Esta sección estará disponible próximamente</h1><p>Por ahora puedes consultar el resumen de tu atención.</p><Button type="button" onClick={() => select("summary")}>Volver al resumen</Button></section> : <Summary appointment={appointmentStore.appointments[0]} confirmed={confirmed} notify={notify} onConfirm={() => setConfirmed(true)} />}
       </main>
     </div>
   </div>;
