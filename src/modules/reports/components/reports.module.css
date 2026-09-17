@@ -1,0 +1,48 @@
+.chartGrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.bars { display: grid; gap: 13px; padding-top: 4px; }
+.barRow { align-items: center; display: grid; gap: 11px; grid-template-columns: minmax(96px, 26%) 1fr auto; }
+.barLabel { color: var(--muted); font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barTrack { background: #eef4f4; border-radius: 999px; display: block; height: 13px; overflow: hidden; width: 100%; }
+.barFill { border-radius: 999px; display: block; height: 100%; transition: width .25s ease; }
+.barValue { font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+.donutWrap { align-items: center; display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; padding-top: 6px; }
+.donut { flex: 0 0 auto; height: 172px; width: 172px; }
+.donutTotal { fill: var(--text); font-size: 15px; font-weight: 700; }
+.donutCaption { fill: var(--muted); font-size: 8px; text-transform: uppercase; }
+.legend { display: grid; flex: 1 1 200px; gap: 10px; list-style: none; margin: 0; min-width: 190px; padding: 0; }
+.legendItem { align-items: center; display: grid; font-size: 12px; gap: 10px; grid-template-columns: 12px 1fr auto; }
+.swatch { border-radius: 4px; height: 12px; width: 12px; }
+.legendLabel { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legendValue { font-weight: 700; white-space: nowrap; }
+
+.lineWrap { padding-top: 6px; }
+.line { display: block; height: auto; width: 100%; }
+.lineAxis { color: var(--muted); display: flex; font-size: 11px; justify-content: space-between; margin-top: 6px; }
+
+.chartEmpty { color: var(--muted); font-size: 12px; margin: 0; padding: 18px 0; text-align: center; }
+.chartTotal { text-align: right; }
+
+.sheet { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.sheetBar { align-items: center; background: #f8fbfb; border-bottom: 1px solid var(--border); color: var(--muted); display: flex; font-size: 11px; font-weight: 700; gap: 8px; padding: 9px 12px; text-transform: uppercase; }
+.sheetBody { overflow-x: auto; padding: 16px; }
+.pdfTitle { font-size: 16px; margin: 0; }
+.pdfMeta { color: var(--muted); font-size: 11px; margin: 4px 0 14px; }
+.pdfIndicators { border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 14px; padding: 12px 0; }
+.pdfIndicator span { color: var(--muted); display: block; font-size: 10px; text-transform: uppercase; }
+.pdfIndicator strong { display: block; font-size: 14px; margin-top: 3px; }
+.sheetTable { border-collapse: collapse; font-size: 12px; min-width: 460px; width: 100%; }
+.sheetTable th, .sheetTable td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+.sheetTable thead th { background: #f1f7f7; color: var(--muted); font-size: 11px; }
+.sheetColumns th { background: #eaf2f2; color: var(--muted); font-size: 10px; text-align: center; }
+.sheetTotal td { background: #f8fbfb; font-weight: 700; }
+.sheetNote { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 0; }
+
+@media (max-width: 520px) {
+  .pdfIndicators { grid-template-columns: 1fr; }
+  .barRow { grid-template-columns: 1fr auto; }
+  .barTrack { grid-column: 1 / -1; grid-row: 2; }
+  .donutWrap { gap: 16px; }
+  .donut { height: 148px; width: 148px; }
+}
