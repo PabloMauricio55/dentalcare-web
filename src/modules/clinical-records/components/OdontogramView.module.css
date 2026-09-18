@@ -1,0 +1,142 @@
+.odontogramGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quadrant {
+  background: #f8fbfb;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.quadrantTitle {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.quadrantTeeth {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(48px, 1fr));
+}
+
+.tooth {
+  align-items: center;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 6px;
+  text-align: center;
+  transition: border-color .15s ease, outline .15s ease, transform .15s ease;
+}
+
+.tooth:hover {
+  transform: translateY(-1px);
+}
+
+.tooth strong {
+  font-size: 14px;
+}
+
+.tooth span {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.toothHealthy {
+  background: #e1f4ea;
+  color: #206b49;
+}
+
+.toothCarious {
+  background: #ffe0dc;
+  color: #9f342b;
+}
+
+.toothMissing {
+  background: #e8ecec;
+  color: #495858;
+}
+
+.toothTreated {
+  background: #dce8ff;
+  color: #24528f;
+}
+
+.toothToTreat {
+  background: #fff1d7;
+  color: #8b5c12;
+}
+
+.tooth.selected {
+  border-color: var(--teal-dark);
+  outline: 3px solid rgba(23, 188, 188, .28);
+  outline-offset: 2px;
+}
+
+.legend {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.legendItem {
+  align-items: center;
+  display: inline-flex;
+  font-size: 12px;
+  gap: 7px;
+}
+
+.legendSwatch {
+  border: 1px solid rgba(31, 41, 41, .18);
+  border-radius: 5px;
+  display: inline-flex;
+  height: 18px;
+  width: 18px;
+}
+
+.legendHealthy { background: #e1f4ea; }
+.legendCarious { background: #ffe0dc; }
+.legendMissing { background: #e8ecec; }
+.legendTreated { background: #dce8ff; }
+.legendToTreat { background: #fff1d7; }
+
+.statusActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statusButton {
+  min-width: 104px;
+}
+
+@media (max-width: 700px) {
+  .odontogramGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .quadrantTeeth {
+    grid-template-columns: repeat(2, minmax(48px, 1fr));
+  }
+}

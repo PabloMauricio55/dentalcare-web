@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, PageHeader } from '@/shared/components';
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
 
 export function CurrentAttentionView() {
@@ -7,61 +8,86 @@ export function CurrentAttentionView() {
     useClinicalRecord();
 
   return (
-    <main>
-      <header>
-        <p>Expediente clínico</p>
-        <h1>Atención actual</h1>
-        <p>{patient.fullName} · {patient.recordNumber}</p>
-      </header>
+    <>
+      <PageHeader
+        title="Atención actual"
+        description={`${patient.fullName} · ${patient.recordNumber}`}
+      />
 
-      <section aria-labelledby="patient-summary-title">
-        <h2 id="patient-summary-title">Paciente seleccionado</h2>
-        <p>Fecha de nacimiento: {patient.birthDate}</p>
-        <p>
-          Alergias:{' '}
-          {patient.allergies.length > 0 ? patient.allergies.join(', ') : 'Ninguna registrada'}
-        </p>
+      <section className="card" aria-labelledby="patient-summary-title">
+        <div className="card-heading">
+          <div>
+            <h3 id="patient-summary-title">Paciente seleccionado</h3>
+            <p>Información principal del expediente clínico.</p>
+          </div>
+        </div>
+        <div className="info-grid">
+          <div>
+            <span>Fecha de nacimiento</span>
+            <strong>{patient.birthDate}</strong>
+          </div>
+          <div>
+            <span>Alergias</span>
+            <strong>{patient.allergies.length > 0 ? patient.allergies.join(', ') : 'Ninguna registrada'}</strong>
+          </div>
+        </div>
       </section>
 
       <form
+        className="card"
         onSubmit={(event) => {
           event.preventDefault();
           saveAttention();
         }}
       >
-        <h2>Registro de atención</h2>
-        <label htmlFor="attention-reason">Motivo de atención</label>
-        <input
-          id="attention-reason"
-          value={attention.reason}
-          onChange={(event) => updateAttention({ reason: event.target.value })}
-          required
-        />
+        <div className="card-heading">
+          <div>
+            <h3>Registro de atención</h3>
+            <p>Documenta el motivo, las notas clínicas y los siguientes pasos.</p>
+          </div>
+        </div>
+        <div className="form-grid">
+          <div className="field full">
+            <label htmlFor="attention-reason">Motivo de atención</label>
+            <input
+              id="attention-reason"
+              value={attention.reason}
+              onChange={(event) => updateAttention({ reason: event.target.value })}
+              required
+            />
+          </div>
 
-        <label htmlFor="attention-notes">Notas clínicas</label>
-        <textarea
-          id="attention-notes"
-          value={attention.notes}
-          onChange={(event) => updateAttention({ notes: event.target.value })}
-          required
-          rows={5}
-        />
+          <div className="field">
+            <label htmlFor="attention-notes">Notas clínicas</label>
+            <textarea
+              id="attention-notes"
+              value={attention.notes}
+              onChange={(event) => updateAttention({ notes: event.target.value })}
+              required
+              rows={5}
+            />
+          </div>
 
-        <label htmlFor="attention-next-steps">Siguientes pasos</label>
-        <textarea
-          id="attention-next-steps"
-          value={attention.nextSteps}
-          onChange={(event) => updateAttention({ nextSteps: event.target.value })}
-          rows={3}
-        />
+          <div className="field">
+            <label htmlFor="attention-next-steps">Siguientes pasos</label>
+            <textarea
+              id="attention-next-steps"
+              value={attention.nextSteps}
+              onChange={(event) => updateAttention({ nextSteps: event.target.value })}
+              rows={5}
+            />
+          </div>
+        </div>
 
-        <button type="submit">Guardar atención</button>
+        <div className="form-submit">
+          <Button type="submit">Guardar atención</Button>
+        </div>
         {feedback && (
           <p role="status" aria-live="polite">
             {feedback.message}
           </p>
         )}
       </form>
-    </main>
+    </>
   );
 }
