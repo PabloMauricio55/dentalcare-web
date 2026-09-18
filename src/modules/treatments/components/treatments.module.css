@@ -62,6 +62,27 @@
   overflow-wrap: anywhere;
 }
 
+:global(.table-actions) .approvePlanButton {
+  min-width: max-content;
+  padding-inline: 12px;
+  width: auto;
+  white-space: nowrap;
+}
+
+.plansTableCard :global(th),
+.plansTableCard :global(td) {
+  text-align: center !important;
+}
+
+.plansTableCard :global(.table-actions) {
+  justify-content: center;
+}
+
+.budgetTableCard :global(th),
+.budgetTableCard :global(td) {
+  text-align: center;
+}
+
 .planForm {
   display: grid;
   min-width: 0;

@@ -14,5 +14,6 @@ GitHub Issues es la fuente oficial. Este archivo registra el resultado de las ta
 | #35 | Roles visuales y responsive de gestión | `feature/issue-35-roles-responsive` | #58 | Integrado en `develop` |
 | #36 | Validaciones, reprogramación y exportaciones de citas | `feature/issue-36-validaciones-citas` | #59 | Integrado en `develop` |
 | #37 | Usuarios, auditoría, permisos y catálogos | `feature/issue-37-settings-validaciones` | #60 | Listo para revisión |
+| #61 | Impresión funcional de jornada filtrada | `feature/issue-61-impresion-jornada` | #64 | Listo para revisión |
 
 Antes de iniciar una tarea nueva se debe consultar su Issue actualizado, crear una rama independiente desde `develop` y respetar `SCOPE.md`.

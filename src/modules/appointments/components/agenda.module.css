@@ -204,6 +204,10 @@
   margin: 0 0 9px auto;
 }
 
+.printSheet {
+  display: none;
+}
+
 .slotSuggestions {
   background: #f0fbf9;
   border: 1px solid #b7e2dd;
@@ -257,4 +261,128 @@
   .operationalFilters p {
     margin: 0;
   }
+}
+
+@media print {
+  .screenOnly {
+    display: none !important;
+  }
+
+  .printSheet {
+    color: #1f2929;
+    display: block;
+    font-family: Inter, Arial, sans-serif;
+  }
+
+  .printHeader {
+    align-items: flex-end;
+    border-bottom: 2px solid #17bcbc;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 16px;
+  }
+
+  .printHeader > div:first-child {
+    display: grid;
+    gap: 2px;
+  }
+
+  .printHeader > div:first-child span {
+    color: #149b9b;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .printHeader > div:first-child strong,
+  .printHeader p {
+    color: #5b6d6d;
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .printHeader h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    text-align: right;
+  }
+
+  .printHeader > div:last-child p {
+    text-align: right;
+    text-transform: capitalize;
+  }
+
+  .printSummary {
+    display: flex;
+    gap: 36px;
+    padding: 18px 0 12px;
+  }
+
+  .printSummary p {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+  }
+
+  .printSummary span {
+    color: #5b6d6d;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .printTable {
+    border-collapse: collapse;
+    font-size: 11px;
+    width: 100%;
+  }
+
+  .printTable th {
+    background: #e8f7f6 !important;
+    color: #315d62;
+    font-size: 9px;
+    letter-spacing: .04em;
+    padding: 9px 7px;
+    text-align: left;
+    text-transform: uppercase;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printTable td {
+    border-bottom: 1px solid #dce8e8;
+    padding: 10px 7px;
+    vertical-align: top;
+  }
+
+  .printTable td small {
+    color: #5b6d6d;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .printEmpty {
+    border: 1px dashed #abcfd1;
+    border-radius: 10px;
+    padding: 36px;
+    text-align: center;
+  }
+
+  .printEmpty p {
+    color: #5b6d6d;
+    margin: 6px 0 0;
+  }
+
+  .printFooter {
+    border-top: 1px solid #dce8e8;
+    color: #5b6d6d;
+    font-size: 9px;
+    margin-top: 24px;
+    padding-top: 8px;
+    text-align: right;
+  }
+}
+
+@page {
+  margin: 14mm;
+  size: landscape;
 }

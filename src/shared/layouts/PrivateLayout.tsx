@@ -1,10 +1,11 @@
 "use client";
 
-import { Bell, Menu, Search, UserRound } from "lucide-react";
+import { Bell, Menu, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useApp, roles } from "@/providers/AppProviders";
 import { routeTitles } from "@/shared/constants/navigation";
 import { Sidebar } from "@/shared/navigation/Sidebar";
+import { UserProfileMenu } from "@/shared/navigation/UserProfileMenu";
 
 export function PrivateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,7 +43,7 @@ export function PrivateLayout({ children }: { children: React.ReactNode }) {
               <Bell size={20} />
               <span className="notification-dot" />
             </button>
-            <div className="avatar" title={`Daniel · ${role}`}><UserRound size={19} /></div>
+            <UserProfileMenu />
           </div>
         </header>
         <main className="main-content">{children}</main>
