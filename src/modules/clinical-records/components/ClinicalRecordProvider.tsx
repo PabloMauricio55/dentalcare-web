@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
+import { EmptyState } from '@/shared/components';
 import { ClinicalRecordContext } from '@/modules/clinical-records/hooks/useClinicalRecord';
 import {
   getMockClinicalRecordSections,
@@ -30,6 +31,17 @@ export function ClinicalRecordProvider({
     getMockClinicalRecordSections,
   );
   const patient = getMockPatient(patientId);
+
+  if (!patient) {
+    return (
+      <section className="card">
+        <EmptyState
+          title="Paciente no encontrado"
+          description="No existe un expediente clínico para el paciente solicitado."
+        />
+      </section>
+    );
+  }
 
   function updateSection<Key extends ClinicalRecordSectionKey>(
     key: Key,
