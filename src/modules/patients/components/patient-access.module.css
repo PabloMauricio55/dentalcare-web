@@ -91,10 +91,6 @@
 }
 
 @media print {
-  :global(body *) {
-    visibility: hidden;
-  }
-
   .credentialCard,
   .credentialCard * {
     visibility: visible;
@@ -107,6 +103,7 @@
     border-radius: 0;
     background: #ffffff;
     color: #1f2929;
+    z-index: 9999;
   }
 
   .previewActions {

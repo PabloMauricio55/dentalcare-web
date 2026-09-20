@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ChevronRight, FileText, PauseCircle, PlayCircle, ReceiptText } from "lucide-react";
+import { CheckCircle2, ChevronRight, PauseCircle, ReceiptText } from "lucide-react";
 import { Button, ConfirmDialog, EmptyState, Modal, StatusBadge } from "@/shared/components";
 import { BudgetStatus, mockBudgets, mockTreatments, PatientBudget, PatientTreatment } from "../data/treatments-budgets.mock";
 import styles from "./patient-portal.module.css";

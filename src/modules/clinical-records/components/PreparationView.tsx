@@ -1,13 +1,14 @@
 'use client';
 
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
+import styles from './clinical-records.module.css';
 
 export function PreparationView() {
   const { patient, sections, updateSection, saveSection } = useClinicalRecord();
   const { data, feedback } = sections.preparacion;
 
   return (
-    <main>
+    <main className={styles.page}>
       <header>
         <p>Expediente clínico</p>
         <h1>Preparación</h1>
