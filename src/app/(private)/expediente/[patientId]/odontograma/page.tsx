@@ -1,5 +1,5 @@
-import { OdontogramView } from "@/modules/clinical-records/components/OdontogramView";
+import { ClinicalOdontogramView } from "@/modules/clinical-records/components/ClinicalOdontogramView";
 
 export default function OdontogramaPage() {
-  return <OdontogramView />;
+  return <ClinicalOdontogramView />;
 }

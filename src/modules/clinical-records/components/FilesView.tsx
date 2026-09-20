@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
 import type { ClinicalFile } from '@/modules/clinical-records/types/clinical-record-session.type';
+import styles from './clinical-records.module.css';
 
 type UploadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -46,7 +47,7 @@ export function FilesView() {
   }
 
   return (
-    <main>
+    <main className={styles.page}>
       <header>
         <p>Expediente clínico</p>
         <h1>Archivos</h1>

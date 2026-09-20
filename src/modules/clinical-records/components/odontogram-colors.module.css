@@ -1,0 +1,28 @@
+.healthy {
+  fill: #ffffff !important;
+  stroke: #8aa1a6 !important;
+}
+
+.carious {
+  fill: #ffe2e2 !important;
+  stroke: #f05f5f !important;
+  stroke-width: 1.8;
+}
+
+.treated {
+  fill: #dff2fb !important;
+  stroke: #3498c5 !important;
+  stroke-width: 1.8;
+}
+
+.missing {
+  fill: #eef1f2 !important;
+  stroke: #7f9094 !important;
+  stroke-dasharray: 3;
+}
+
+.toTreat {
+  fill: #fff0cf !important;
+  stroke: #e2a12d !important;
+  stroke-width: 1.8;
+}

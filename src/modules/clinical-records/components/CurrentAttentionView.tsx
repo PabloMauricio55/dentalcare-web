@@ -1,13 +1,29 @@
 'use client';
 
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
+import styles from './clinical-records.module.css';
+
+const attentionReasons = [
+  'Evaluación odontológica de rutina',
+  'Evaluación inicial para ortodoncia',
+  'Control de tratamiento de ortodoncia',
+  'Dolor dental agudo',
+  'Caries dental y restauración',
+  'Limpieza dental y profilaxis',
+  'Revisión periodontal',
+  'Tratamiento de conductos',
+  'Extracción dental',
+  'Consulta por sensibilidad dental',
+  'Revisión de prótesis dental',
+  'Urgencia odontológica',
+];
 
 export function CurrentAttentionView() {
   const { patient, attention, feedback, updateAttention, saveAttention } =
     useClinicalRecord();
 
   return (
-    <main>
+    <main className={styles.page}>
       <header>
         <p>Expediente clínico</p>
         <h1>Atención actual</h1>
@@ -31,12 +47,15 @@ export function CurrentAttentionView() {
       >
         <h2>Registro de atención</h2>
         <label htmlFor="attention-reason">Motivo de atención</label>
-        <input
+        <select
           id="attention-reason"
           value={attention.reason}
           onChange={(event) => updateAttention({ reason: event.target.value })}
           required
-        />
+        >
+          <option value="" disabled>Selecciona un motivo de atención</option>
+          {attentionReasons.map((reason) => <option key={reason} value={reason}>{reason}</option>)}
+        </select>
 
         <label htmlFor="attention-notes">Notas clínicas</label>
         <textarea
