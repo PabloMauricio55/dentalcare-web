@@ -13,21 +13,34 @@ import type {
 } from '@/modules/clinical-records/types/clinical-record-session.type';
 
 const mockPatients: Record<string, PatientSummary> = {
-  'patient-001': {
-    id: 'patient-001',
+  p1: {
+    id: 'p1',
     fullName: 'Mariana López Hernández',
     birthDate: '1991-04-18',
     recordNumber: 'EXP-2026-001',
     allergies: ['Penicilina'],
   },
-};
-
-const defaultPatient: PatientSummary = {
-  id: 'patient-demo',
-  fullName: 'Paciente de demostración',
-  birthDate: '1988-11-03',
-  recordNumber: 'EXP-DEMO-001',
-  allergies: [],
+  p2: {
+    id: 'p2',
+    fullName: 'Carlos Méndez Rivera',
+    birthDate: '1987-09-22',
+    recordNumber: 'EXP-2026-002',
+    allergies: [],
+  },
+  p3: {
+    id: 'p3',
+    fullName: 'Sofía Castillo Morales',
+    birthDate: '1995-02-11',
+    recordNumber: 'EXP-2026-003',
+    allergies: ['Ibuprofeno'],
+  },
+  p4: {
+    id: 'p4',
+    fullName: 'Jorge Ramírez Soto',
+    birthDate: '1979-12-05',
+    recordNumber: 'EXP-2026-004',
+    allergies: ['Látex'],
+  },
 };
 
 const defaultAttention: CurrentAttention = {
@@ -36,8 +49,8 @@ const defaultAttention: CurrentAttention = {
   nextSteps: 'Realizar exploración clínica y actualizar el odontograma.',
 };
 
-export function getMockPatient(patientId: string): PatientSummary {
-  return mockPatients[patientId] ?? { ...defaultPatient, id: patientId };
+export function getMockPatient(patientId: string): PatientSummary | null {
+  return mockPatients[patientId] ?? null;
 }
 
 export function getMockCurrentAttention(): CurrentAttention {
