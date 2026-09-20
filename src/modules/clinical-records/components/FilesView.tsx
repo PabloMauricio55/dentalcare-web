@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Button, DataTable, PageHeader, StatusBadge, type Column } from '@/shared/components';
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
 import type { ClinicalFile } from '@/modules/clinical-records/types/clinical-record-session.type';
 
@@ -45,52 +46,49 @@ export function FilesView() {
     }, 350);
   }
 
+  const columns: Column<ClinicalFile>[] = [
+    { key: 'name', header: 'Archivo', cell: (file) => <strong>{file.name}</strong> },
+    { key: 'type', header: 'Tipo', cell: (file) => file.type },
+    { key: 'date', header: 'Fecha', cell: (file) => file.date },
+    { key: 'status', header: 'Estado', cell: (file) => <StatusBadge status={file.status === 'uploaded' ? 'Cargado' : 'Error'} /> },
+  ];
+
   return (
-    <main>
-      <header>
-        <p>Expediente clínico</p>
-        <h1>Archivos</h1>
-        <p>{patient.fullName} · {patient.recordNumber}</p>
-      </header>
-
-      <section aria-labelledby="files-patient-title">
-        <h2 id="files-patient-title">Paciente seleccionado</h2>
-        <p>Fecha de nacimiento: {patient.birthDate}</p>
+    <>
+      <PageHeader title="Archivos" description={`${patient.fullName} · ${patient.recordNumber}`} />
+      <section className="card" aria-labelledby="files-patient-title">
+        <div className="card-heading"><div><h3 id="files-patient-title">Paciente seleccionado</h3><p>Información principal del expediente clínico.</p></div></div>
+        <div className="info-grid"><div><span>Fecha de nacimiento</span><strong>{patient.birthDate}</strong></div></div>
       </section>
-
-      <section aria-labelledby="files-list-title">
-        <h2 id="files-list-title">Archivos del expediente</h2>
-        <ul>
-          {files.map((file) => (
-            <li key={file.id}>
-              <strong>{file.name}</strong>
-              <span> · {file.type} · {file.date} · {file.status === 'uploaded' ? 'Cargado' : 'Error'}</span>
-            </li>
-          ))}
-        </ul>
+      <section className="card" aria-labelledby="files-list-title">
+        <div className="card-heading"><div><h3 id="files-list-title">Archivos del expediente</h3><p>Documentos asociados a la atención clínica.</p></div></div>
+        <DataTable columns={columns} rows={files} />
       </section>
-
-      <section aria-labelledby="upload-file-title">
-        <h2 id="upload-file-title">Simular carga</h2>
-        <label htmlFor="file-upload">Seleccionar archivo</label>
-        <input
-          id="file-upload"
-          type="file"
-          onChange={(event) => {
-            setSelectedFileName(event.target.files?.[0]?.name ?? '');
-            setUploadState('idle');
-            setMessage('');
-          }}
-        />
-        <button type="button" onClick={simulateUpload} disabled={uploadState === 'loading'}>
-          {uploadState === 'loading' ? 'Cargando...' : 'Simular carga'}
-        </button>
+      <section className="card" aria-labelledby="upload-file-title">
+        <div className="card-heading"><div><h3 id="upload-file-title">Simular carga</h3><p>Agrega un archivo ficticio al expediente en memoria.</p></div></div>
+        <div className="field">
+          <label htmlFor="file-upload">Seleccionar archivo</label>
+          <input
+            id="file-upload"
+            type="file"
+            onChange={(event) => {
+              setSelectedFileName(event.target.files?.[0]?.name ?? '');
+              setUploadState('idle');
+              setMessage('');
+            }}
+          />
+        </div>
+        <div className="form-submit">
+          <Button type="button" onClick={simulateUpload} disabled={uploadState === 'loading'}>
+            {uploadState === 'loading' ? 'Cargando...' : 'Simular carga'}
+          </Button>
+        </div>
         {message && (
-          <p role="status" aria-live="polite">
+          <p className={uploadState === 'error' ? 'form-error' : 'action-notice'} role="status" aria-live="polite">
             {message}
           </p>
         )}
       </section>
-    </main>
+    </>
   );
 }

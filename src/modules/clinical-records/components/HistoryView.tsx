@@ -1,35 +1,32 @@
 'use client';
 
+import { PageHeader } from '@/shared/components';
 import { useClinicalRecord } from '@/modules/clinical-records/hooks/useClinicalRecord';
 
 export function HistoryView() {
   const { patient, sections } = useClinicalRecord();
 
   return (
-    <main>
-      <header>
-        <p>Expediente clínico</p>
-        <h1>Historial y trazabilidad</h1>
-        <p>{patient.fullName} · {patient.recordNumber}</p>
-      </header>
-
-      <section aria-labelledby="history-patient-title">
-        <h2 id="history-patient-title">Paciente seleccionado</h2>
-        <p>Fecha de nacimiento: {patient.birthDate}</p>
+    <>
+      <PageHeader title="Historial y trazabilidad" description={`${patient.fullName} · ${patient.recordNumber}`} />
+      <section className="card" aria-labelledby="history-patient-title">
+        <div className="card-heading"><div><h3 id="history-patient-title">Paciente seleccionado</h3><p>Información principal del expediente clínico.</p></div></div>
+        <div className="info-grid"><div><span>Fecha de nacimiento</span><strong>{patient.birthDate}</strong></div></div>
       </section>
-
-      <section aria-labelledby="history-events-title">
-        <h2 id="history-events-title">Eventos del expediente</h2>
-        <ol>
+      <section className="card" aria-labelledby="history-events-title">
+        <div className="card-heading"><div><h3 id="history-events-title">Eventos del expediente</h3><p>Registro cronológico de las acciones realizadas.</p></div></div>
+        <div className="timeline">
           {sections.historial.data.entries.map((entry) => (
-            <li key={entry.id}>
-              <strong>{entry.action}</strong>
-              <span> · {new Date(entry.timestamp).toLocaleDateString('es-MX')}</span>
-              <p>Registrado por {entry.author}</p>
-            </li>
+            <article className="timeline-item" key={entry.id}>
+              <time dateTime={entry.timestamp}>{new Date(entry.timestamp).toLocaleDateString('es-MX')}</time>
+              <div className="timeline-line"><i /></div>
+              <div className="appointment-card">
+                <div><strong>{entry.action}</strong><small>Registrado por {entry.author}</small></div>
+              </div>
+            </article>
           ))}
-        </ol>
+        </div>
       </section>
-    </main>
+    </>
   );
 }
