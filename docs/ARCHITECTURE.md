@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-DentalCare Web es una aplicación ejecutable construida con Next.js 16, React 19 y TypeScript. Utiliza App Router, datos simulados y persistencia temporal durante la sesión; todavía no consume un backend.
+DentalCare Web es una aplicación ejecutable construida con Next.js 16, React 19 y TypeScript. Utiliza App Router y una migración progresiva desde datos simulados hacia `dentalcare-api`. La agenda administrativa ya consume el backend real.
 
 ## Organización
 
@@ -24,11 +24,11 @@ Los grupos `(public)`, `(auth)`, `(patient)` y `(private)` organizan las rutas s
 | `models` | Representación interna del dominio |
 | `dtos` | Forma de los datos externos o simulados |
 | `adapters` | Transformación DTO → modelo |
-| `services` | Acceso a datos simulados y futura API |
+| `services` | Acceso a la API o a datos simulados mientras el contrato siga pendiente |
 | `mocks` | Datos de demostración |
 | `validation` | Reglas de validación del dominio |
 
-Flujo previsto al conectar el backend:
+Flujo utilizado por los módulos conectados al backend:
 
 `Page → Component/Hook → Service → API → DTO → Adapter → Model → UI`
 
@@ -36,4 +36,4 @@ No se debe llamar a una API directamente desde un componente ni colocar lógica 
 
 ## Estado compartido
 
-`ClinicSessionProvider` mantiene durante la navegación la selección del paciente y las acciones simuladas de agenda. `SettingsProvider` mantiene los cambios simulados de configuración. Esta persistencia termina al recargar la aplicación y no sustituye una base de datos.
+`ClinicSessionProvider` mantiene durante la navegación la selección del paciente y los flujos locales todavía no migrados. La agenda general usa su service real y no se alimenta de los mocks del proveedor. `SettingsProvider` mantiene los cambios simulados de configuración. La persistencia simulada termina al recargar la aplicación y no sustituye una base de datos.

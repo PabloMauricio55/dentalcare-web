@@ -7,7 +7,7 @@ Frontend de DentalCare para la web pública, el portal del paciente y el sistema
 - Next.js 16 con App Router.
 - React 19.
 - TypeScript.
-- Datos simulados, sin conexión al backend.
+- Datos simulados en los módulos pendientes e integración progresiva con `dentalcare-api`.
 
 ## Requisitos
 
@@ -22,6 +22,8 @@ npm run dev
 ```
 
 Abrir `http://localhost:3000`.
+
+Para las vistas conectadas al backend, copiar `.env.example` a `.env.local` y configurar `NEXT_PUBLIC_API_URL` con la URL de `dentalcare-api`.
 
 ## Verificación
 

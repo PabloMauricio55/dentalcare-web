@@ -4,6 +4,59 @@
   margin: 0 0 14px;
 }
 
+.apiFilters {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(210px, 1fr) minmax(210px, 1fr) minmax(150px, .55fr) auto;
+  margin: 18px 0 12px;
+}
+
+.apiFilters input,
+.apiFilters select {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  min-height: 38px;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.apiFilters small {
+  color: var(--danger);
+  display: block;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+.errorNotice {
+  align-items: center;
+  background: #fff3f3;
+  border: 1px solid #f2c6c6;
+  border-radius: 10px;
+  color: #9d3737;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.detailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.fullDetail small {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
 .calendarScroll {
   overflow-x: auto;
 }
@@ -245,6 +298,15 @@
 }
 
 @media (max-width: 700px) {
+  .apiFilters {
+    grid-template-columns: 1fr;
+  }
+
+  .errorNotice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .detailGrid {
     grid-template-columns: 1fr;
   }

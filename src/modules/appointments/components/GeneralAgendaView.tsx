@@ -1,355 +1,228 @@
 "use client";
 
-import {
-  Ban,
-  CalendarClock,
-  CalendarPlus,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  DoorOpen,
-  Eye,
-  MoreHorizontal,
-  Pencil,
-  UserX,
-} from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
-import {
-  ActionNotice,
-  Button,
-  ConfirmDialog,
-  EmptyState,
-  Modal,
-  PageHeader,
-  StatusBadge,
-} from "@/shared/components";
-import type { Appointment, AppointmentStatus } from "../models/appointment";
-import {
-  DEMO_TODAY,
-  formatLongDate,
-  formatMonth,
-  formatShortDate,
-  isSameMonth,
-  monthDates,
-  shiftDate,
-  weekDates,
-} from "../services/agenda-date.service";
-import { appointmentScheduleService, type AppointmentSlot } from "../services/appointment-schedule.service";
-import { useClinicSession } from "./ClinicSessionProvider";
+import { Ban, CalendarCheck, CalendarClock, CalendarPlus, ChevronLeft, ChevronRight, Eye, RefreshCw } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ActionNotice, Button, ConfirmDialog, EmptyState, LoadingState, Modal, PageHeader, RoleAccessNotice, StatusBadge } from "@/shared/components";
+import { useApp } from "@/providers/AppProviders";
+import { ApiError } from "@/shared/lib/api-client";
+import type { AdministrativeAppointment, AdministrativeAppointmentStatus } from "../models/administrative-appointment";
+import { administrativeAppointmentService } from "../services/administrative-appointment.service";
+import { formatLongDate, formatMonth, formatShortDate, isSameMonth, monthDates, shiftDate, weekDates } from "../services/agenda-date.service";
 import styles from "./agenda.module.css";
 
 type AgendaView = "day" | "week" | "month";
-type AgendaModal = "schedule" | "actions" | "detail" | "edit" | "reschedule" | null;
+type AgendaModal = "schedule" | "detail" | "reschedule" | null;
+type PendingStatus = "COMPLETED" | "CANCELLED" | null;
 
 const viewLabels: Record<AgendaView, string> = { day: "Día", week: "Semana", month: "Mes" };
-const closedStatuses: AppointmentStatus[] = ["Cancelada", "No asistió", "Rechazada"];
+const statusLabels: Record<AdministrativeAppointmentStatus, string> = { scheduled: "Programada", completed: "Completada", cancelled: "Cancelada" };
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function localDate(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function appointmentDate(value: string) { return localDate(new Date(value)); }
+
+function appointmentTime(value: string) {
+  return new Intl.DateTimeFormat("es-GT", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(value));
+}
+
+function toInstant(date: string, time: string) { return new Date(`${date}T${time}:00`).toISOString(); }
+
+function rangeFor(view: AgendaView, selectedDate: string) {
+  const dates = view === "day" ? [selectedDate] : view === "week" ? weekDates(selectedDate) : monthDates(selectedDate);
+  return {
+    from: new Date(`${dates[0]}T00:00:00`).toISOString(),
+    to: new Date(`${dates[dates.length - 1]}T23:59:59.999`).toISOString(),
+  };
+}
+
+function readableError(error: unknown) {
+  if (!(error instanceof ApiError)) return "No fue posible completar la operación. Inténtalo nuevamente.";
+  const details = Object.values(error.fieldErrors);
+  return details.length ? `${error.message} ${details.join(" ")}` : error.message;
+}
 
 export function GeneralAgendaView({ initialPatientId = "", openSchedule = false }: { initialPatientId?: string; openSchedule?: boolean }) {
-  const {
-    appointments,
-    patients,
-    addAppointment,
-    updateAppointment,
-    updateAppointmentStatus,
-    rescheduleAppointment,
-  } = useClinicSession();
-  const [selectedDate, setSelectedDate] = useState(DEMO_TODAY);
+  const { role } = useApp();
+  const [selectedDate, setSelectedDate] = useState(() => localDate(new Date()));
   const [view, setView] = useState<AgendaView>("day");
-  const [professional, setProfessional] = useState("Todos");
-  const [modal, setModal] = useState<AgendaModal>(openSchedule ? "schedule" : null);
-  const [active, setActive] = useState<Appointment | null>(null);
-  const [pendingStatus, setPendingStatus] = useState<AppointmentStatus | null>(null);
+  const [patientId, setPatientId] = useState(initialPatientId);
+  const [professionalId, setProfessionalId] = useState("");
+  const [status, setStatus] = useState("");
+  const [appointments, setAppointments] = useState<AdministrativeAppointment[]>([]);
+  const [patientOptions, setPatientOptions] = useState<AdministrativeAppointment["patient"][]>([]);
+  const [professionalOptions, setProfessionalOptions] = useState<AdministrativeAppointment["professional"][]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [formError, setFormError] = useState("");
   const [notice, setNotice] = useState("");
-  const [error, setError] = useState("");
-  const [suggestedSlots, setSuggestedSlots] = useState<AppointmentSlot[]>([]);
+  const [modal, setModal] = useState<AgendaModal>(openSchedule && (role === "Administrador" || role === "Secretaría") ? "schedule" : null);
+  const [active, setActive] = useState<AdministrativeAppointment | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<PendingStatus>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const professionals = useMemo(
-    () => Array.from(new Set(appointments.map((item) => item.professional))).sort(),
-    [appointments],
-  );
-  const calendarAppointments = useMemo(
-    () => appointments
-      .filter((item) => !["Solicitada", "Propuesta enviada", "Pendiente de respuesta", "Rechazada"].includes(item.status))
-      .filter((item) => professional === "Todos" || item.professional === professional)
-      .sort((left, right) => `${left.date}${left.time}`.localeCompare(`${right.date}${right.time}`)),
-    [appointments, professional],
-  );
-  const patientName = (id: string) => patients.find((patient) => patient.id === id)?.name ?? "Paciente";
-  const appointmentsFor = (date: string) => calendarAppointments.filter((item) => item.date === date);
+  const canRead = role !== "Cajero";
+  const canManageSchedule = role === "Administrador" || role === "Secretaría";
+  const canUpdateStatus = role !== "Cajero";
+  const visibleDates = useMemo(() => view === "week" ? weekDates(selectedDate) : monthDates(selectedDate), [selectedDate, view]);
+  const invalidPatientFilter = patientId !== "" && !uuidPattern.test(patientId);
+  const invalidProfessionalFilter = professionalId !== "" && !uuidPattern.test(professionalId);
+
+  const loadAppointments = useCallback(async (signal?: AbortSignal) => {
+    if (!canRead || invalidPatientFilter || invalidProfessionalFilter) {
+      setAppointments([]);
+      setTotal(0);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setLoadError("");
+    try {
+      const page = await administrativeAppointmentService.list({
+        ...rangeFor(view, selectedDate),
+        patientId: patientId || undefined,
+        professionalId: professionalId || undefined,
+        status: status ? status as "SCHEDULED" | "COMPLETED" | "CANCELLED" : undefined,
+        page: 0,
+        size: 100,
+      }, signal);
+      setAppointments(page.content);
+      setTotal(page.totalElements);
+      setPatientOptions((current) => mergeById(current, page.content.map((item) => item.patient)));
+      setProfessionalOptions((current) => mergeById(current, page.content.map((item) => item.professional)));
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAppointments([]);
+      setTotal(0);
+      setLoadError(readableError(error));
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, [canRead, invalidPatientFilter, invalidProfessionalFilter, patientId, professionalId, selectedDate, status, view]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => void loadAppointments(controller.signal), 250);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [loadAppointments, reloadKey]);
+
+  const appointmentsFor = (date: string) => appointments.filter((item) => appointmentDate(item.scheduledAt) === date);
   const selectedItems = appointmentsFor(selectedDate);
-  const visibleDates = view === "week" ? weekDates(selectedDate) : monthDates(selectedDate);
+  const description = view === "day" ? formatLongDate(selectedDate) : view === "week" ? `${formatShortDate(visibleDates[0])} – ${formatShortDate(visibleDates[6])}` : formatMonth(selectedDate);
 
-  const description = view === "day"
-    ? formatLongDate(selectedDate)
-    : view === "week"
-      ? `${formatShortDate(visibleDates[0])} – ${formatShortDate(visibleDates[6])}`
-      : formatMonth(selectedDate);
-
-  const moveDate = (direction: -1 | 1) => {
-    setSelectedDate((current) => shiftDate(current, direction, view));
+  const closeModal = () => {
+    if (busy) return;
+    setModal(null);
+    setFormError("");
   };
 
-  const openActions = (appointment: Appointment) => {
+  const openDetail = async (appointment: AdministrativeAppointment) => {
     setActive(appointment);
-    setError("");
-    setSuggestedSlots([]);
-    setModal("actions");
+    setModal("detail");
+    setDetailLoading(true);
+    setFormError("");
+    try { setActive(await administrativeAppointmentService.findById(appointment.id)); }
+    catch (error) { setFormError(readableError(error)); }
+    finally { setDetailLoading(false); }
   };
 
-  const submitNew = (event: FormEvent<HTMLFormElement>) => {
+  const submitNew = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (busy) return;
     const data = new FormData(event.currentTarget);
-    const dto = {
-      patientId: String(data.get("patientId")),
-      date: String(data.get("date")),
-      time: String(data.get("time")),
-      duration: Number(data.get("duration")),
-      professional: String(data.get("professional")),
-      reason: String(data.get("reason")),
-    };
-    if (!dto.patientId.trim() || !dto.date.trim() || !dto.time.trim() || !dto.professional.trim() || !dto.reason.trim() || dto.duration < 5) {
-      setError("Completa todos los campos obligatorios.");
+    const nextPatientId = String(data.get("patientId") ?? "").trim();
+    const nextProfessionalId = String(data.get("professionalId") ?? "").trim();
+    const date = String(data.get("date") ?? "");
+    const time = String(data.get("time") ?? "");
+    if (!uuidPattern.test(nextPatientId) || !uuidPattern.test(nextProfessionalId) || !date || !time) {
+      setFormError("Ingresa identificadores UUID válidos y selecciona la fecha y hora.");
       return;
     }
-    const result = addAppointment(dto);
-    if (!result.ok) {
-      setError(`El profesional ya tiene una cita que coincide con este horario. Elige otra hora.`);
-      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, dto));
-      return;
-    }
-    setSelectedDate(dto.date);
-    setModal(null);
-    setError("");
-    setNotice("La cita fue agendada y confirmada.");
+    setBusy(true);
+    setFormError("");
+    try {
+      const created = await administrativeAppointmentService.create({ patientId: nextPatientId, professionalId: nextProfessionalId, scheduledAt: toInstant(date, time) });
+      setSelectedDate(appointmentDate(created.scheduledAt));
+      setModal(null);
+      setNotice("La cita se guardó correctamente en DentalCare API.");
+      setReloadKey((key) => key + 1);
+    } catch (error) { setFormError(readableError(error)); }
+    finally { setBusy(false); }
   };
 
-  const submitEdit = (event: FormEvent<HTMLFormElement>) => {
+  const submitReschedule = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!active) return;
+    if (!active || busy) return;
     const data = new FormData(event.currentTarget);
-    const reason = String(data.get("reason")).trim();
-    const nextProfessional = String(data.get("professional"));
-    const duration = Number(data.get("duration"));
-    const notes = String(data.get("notes")).trim();
-    if (!reason || !nextProfessional || duration < 5) {
-      setError("Completa el motivo, profesional y una duración válida.");
-      return;
-    }
-    const nextAppointment = { ...active, reason, professional: nextProfessional, duration, notes };
-    const result = updateAppointment(nextAppointment);
-    if (!result.ok) {
-      setError("La duración o el profesional elegido se superpone con otra cita.");
-      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, nextAppointment, active.id));
-      return;
-    }
-    setModal(null);
-    setError("");
-    setNotice("Los datos de la cita fueron actualizados.");
+    const date = String(data.get("date") ?? "");
+    const time = String(data.get("time") ?? "");
+    if (!date || !time) { setFormError("Selecciona la nueva fecha y hora."); return; }
+    setBusy(true);
+    setFormError("");
+    try {
+      const updated = await administrativeAppointmentService.reschedule(active.id, { scheduledAt: toInstant(date, time) });
+      setSelectedDate(appointmentDate(updated.scheduledAt));
+      setActive(updated);
+      setModal(null);
+      setNotice("La cita se reprogramó correctamente.");
+      setReloadKey((key) => key + 1);
+    } catch (error) { setFormError(readableError(error)); }
+    finally { setBusy(false); }
   };
 
-  const submitReschedule = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!active) return;
-    const data = new FormData(event.currentTarget);
-    const date = String(data.get("date"));
-    const time = String(data.get("time"));
-    if (!date || !time) {
-      setError("Selecciona la nueva fecha y hora.");
-      return;
-    }
-    const result = rescheduleAppointment(active.id, date, time);
-    if (!result.ok) {
-      setError("El horario elegido se superpone con otra cita del mismo profesional.");
-      setSuggestedSlots(appointmentScheduleService.alternatives(appointments, { ...active, date, time }, active.id));
-      return;
-    }
-    setSelectedDate(date);
-    setModal(null);
-    setError("");
-    setNotice("La cita fue reprogramada y permanece confirmada.");
+  const confirmStatusChange = async () => {
+    if (!active || !pendingStatus || busy) return;
+    setBusy(true);
+    try {
+      await administrativeAppointmentService.updateStatus(active.id, { status: pendingStatus });
+      setPendingStatus(null);
+      setActive(null);
+      setNotice(pendingStatus === "COMPLETED" ? "La cita quedó completada." : "La cita quedó cancelada.");
+      setReloadKey((key) => key + 1);
+    } catch (error) { setPendingStatus(null); setLoadError(readableError(error)); }
+    finally { setBusy(false); }
   };
 
-  const requestStatusChange = (status: AppointmentStatus) => {
-    setPendingStatus(status);
-    setModal(null);
-  };
+  const renderCompactAppointment = (item: AdministrativeAppointment) => <button className={`${styles.compactAppointment} ${item.status !== "scheduled" ? styles.closedAppointment : ""}`} key={item.id} onClick={() => void openDetail(item)} title={`Ver detalle de ${item.patient.name}`} type="button"><strong>{appointmentTime(item.scheduledAt)} · {item.patient.name}</strong><span>{item.professional.name}</span><span>{statusLabels[item.status]}</span></button>;
 
-  const confirmStatusChange = () => {
-    if (!active || !pendingStatus) return;
-    updateAppointmentStatus(active.id, pendingStatus);
-    const message = pendingStatus === "En espera"
-      ? `${patientName(active.patientId)} fue registrado en sala de espera.`
-      : pendingStatus === "Cancelada"
-        ? "La cita fue cancelada y continúa visible en la agenda."
-        : "La cita fue marcada como no asistida.";
-    setNotice(message);
-    setPendingStatus(null);
-    setActive(null);
-  };
+  if (!canRead) return <><PageHeader title="Agenda general" description="Agenda administrativa de la clínica" /><RoleAccessNotice role={role}>El backend no permite que Caja consulte ni modifique la agenda. Cambia a un rol clínico o administrativo autorizado.</RoleAccessNotice></>;
 
-  const renderCompactAppointment = (item: Appointment) => (
-    <button
-      className={`${styles.compactAppointment} ${closedStatuses.includes(item.status) ? styles.closedAppointment : ""}`}
-      key={item.id}
-      onClick={() => openActions(item)}
-      title={`Abrir acciones de ${patientName(item.patientId)}`}
-      type="button"
-    >
-      <strong>{item.time} · {patientName(item.patientId)}</strong>
-      <span>{item.reason}</span>
-      <span>{item.status}</span>
-    </button>
-  );
+  return <>
+    <PageHeader title="Agenda general" description={`${viewLabels[view]} · ${description}`} actions={canManageSchedule ? <Button onClick={() => { setActive(null); setFormError(""); setModal("schedule"); }}><CalendarPlus size={17} /> Agendar cita</Button> : undefined} />
+    {notice && <ActionNotice message={notice} onClose={() => setNotice("")} />}
+    {loadError && <div className={styles.errorNotice} role="alert"><span>{loadError}</span><Button variant="secondary" onClick={() => setReloadKey((key) => key + 1)}><RefreshCw size={16} /> Reintentar</Button></div>}
+    <section className="card">
+      <div className="agenda-toolbar"><div className="date-switcher"><button aria-label={`${viewLabels[view]} anterior`} onClick={() => setSelectedDate((date) => shiftDate(date, -1, view))}><ChevronLeft /></button><button className={selectedDate === localDate(new Date()) ? "today" : ""} onClick={() => setSelectedDate(localDate(new Date()))}>Hoy</button><button aria-label={`${viewLabels[view]} siguiente`} onClick={() => setSelectedDate((date) => shiftDate(date, 1, view))}><ChevronRight /></button></div><div className="view-switch" aria-label="Vista de agenda">{(["day", "week", "month"] as AgendaView[]).map((item) => <button className={view === item ? "active" : ""} key={item} onClick={() => setView(item)} aria-pressed={view === item}>{viewLabels[item]}</button>)}</div></div>
+      <div className={styles.apiFilters}>
+        <label className="compact-field"><span>Paciente</span><input list="agenda-patients" value={patientId} onChange={(event) => setPatientId(event.target.value.trim())} placeholder="Nombre sugerido o UUID" /><datalist id="agenda-patients">{patientOptions.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</datalist>{invalidPatientFilter && <small>Selecciona una sugerencia o escribe un UUID válido.</small>}</label>
+        <label className="compact-field"><span>Profesional</span><input list="agenda-professionals" value={professionalId} onChange={(event) => setProfessionalId(event.target.value.trim())} placeholder="Nombre sugerido o UUID" /><datalist id="agenda-professionals">{professionalOptions.map((professional) => <option value={professional.id} key={professional.id}>{professional.name}</option>)}</datalist>{invalidProfessionalFilter && <small>Selecciona una sugerencia o escribe un UUID válido.</small>}</label>
+        <label className="compact-field"><span>Estado</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">Todos</option><option value="SCHEDULED">Programada</option><option value="COMPLETED">Completada</option><option value="CANCELLED">Cancelada</option></select></label>
+        <Button variant="ghost" onClick={() => { setPatientId(""); setProfessionalId(""); setStatus(""); }}>Limpiar filtros</Button>
+      </div>
+      <p className={styles.summary}>{total} citas encontradas · filtros aplicados automáticamente</p>
+      {loading ? <LoadingState rows={5} /> : !loadError && view === "day" && (selectedItems.length ? <div className="timeline">{selectedItems.map((item) => <article className="timeline-item" key={item.id}><time>{appointmentTime(item.scheduledAt)}</time><div className="timeline-line"><i /></div><div className="appointment-card"><div><strong>{item.patient.name}</strong><span>{item.patient.code} · {item.patient.phone}</span><small>{item.professional.name}</small></div><div className="appointment-actions"><StatusBadge status={statusLabels[item.status]} /><Button variant="secondary" onClick={() => void openDetail(item)}><Eye size={16} /> Ver detalle</Button></div></div></article>)}</div> : <EmptyState title="Sin citas" description="No hay citas reales para la fecha y los filtros seleccionados." />)}
+      {!loading && !loadError && view === "week" && <div className={styles.calendarScroll}><div className={styles.weekGrid}>{visibleDates.map((date) => <div className={styles.dayHeader} key={`head-${date}`}>{formatShortDate(date)}</div>)}{visibleDates.map((date) => <div className={`${styles.dayColumn} ${date === localDate(new Date()) ? styles.todayCell : ""}`} key={date}><div className={styles.compactList}>{appointmentsFor(date).map(renderCompactAppointment)}</div>{!appointmentsFor(date).length && <div className={styles.emptyDay}>Sin citas</div>}</div>)}</div></div>}
+      {!loading && !loadError && view === "month" && <div className={styles.calendarScroll}><div className={styles.monthGrid}>{["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => <div className={styles.monthHeader} key={day}>{day}</div>)}{visibleDates.map((date) => <div className={`${styles.monthCell} ${!isSameMonth(date, selectedDate) ? styles.outsideMonth : ""} ${date === localDate(new Date()) ? styles.todayCell : ""}`} key={date}><div className={styles.dateNumber}>{Number(date.slice(-2))}{date === localDate(new Date()) && <span>Hoy</span>}</div><div className={styles.compactList}>{appointmentsFor(date).map(renderCompactAppointment)}</div></div>)}</div></div>}
+    </section>
 
-  return (
-    <>
-      <PageHeader
-        title="Agenda general"
-        description={`${viewLabels[view]} · ${description}`}
-        actions={<Button onClick={() => { setActive(null); setError(""); setSuggestedSlots([]); setModal("schedule"); }}><CalendarPlus size={17} /> Agendar cita</Button>}
-      />
-      {notice && <ActionNotice message={notice} onClose={() => setNotice("")} />}
-      <section className="card">
-        <div className="agenda-toolbar">
-          <div className="date-switcher">
-            <button aria-label={`${viewLabels[view]} anterior`} onClick={() => moveDate(-1)}><ChevronLeft /></button>
-            <button className={selectedDate === DEMO_TODAY ? "today" : ""} onClick={() => setSelectedDate(DEMO_TODAY)}>Hoy</button>
-            <button aria-label={`${viewLabels[view]} siguiente`} onClick={() => moveDate(1)}><ChevronRight /></button>
-          </div>
-          <div className="view-switch" aria-label="Vista de agenda">
-            {(["day", "week", "month"] as AgendaView[]).map((item) => (
-              <button className={view === item ? "active" : ""} key={item} onClick={() => setView(item)} aria-pressed={view === item}>{viewLabels[item]}</button>
-            ))}
-          </div>
-          <label className="compact-field">
-            <span>Profesional</span>
-            <select value={professional} onChange={(event) => setProfessional(event.target.value)}>
-              <option>Todos</option>
-              {professionals.map((item) => <option key={item}>{item}</option>)}
-            </select>
-          </label>
-        </div>
-        <p className={styles.summary}>{calendarAppointments.length} citas visibles · {professional === "Todos" ? "Todos los profesionales" : professional}</p>
+    <Modal open={modal === "schedule"} title="Agendar cita" description="Se guardará directamente en DentalCare API como una cita programada." onClose={closeModal}><form className="form-grid" onSubmit={submitNew} noValidate><label className="field full"><span>ID del paciente *</span><input name="patientId" list="create-patients" defaultValue={initialPatientId} placeholder="UUID del paciente" autoComplete="off" /><datalist id="create-patients">{patientOptions.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</datalist></label><label className="field full"><span>ID del profesional *</span><input name="professionalId" list="create-professionals" placeholder="UUID del profesional" autoComplete="off" /><datalist id="create-professionals">{professionalOptions.map((professional) => <option value={professional.id} key={professional.id}>{professional.name}</option>)}</datalist></label><label className="field"><span>Fecha *</span><input name="date" type="date" defaultValue={selectedDate} min={localDate(new Date())} /></label><label className="field"><span>Hora *</span><input name="time" type="time" defaultValue="09:00" /></label>{formError && <p className="form-error full" role="alert">{formError}</p>}<div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={closeModal} disabled={busy}>Cancelar</Button><Button type="submit" disabled={busy}>{busy ? "Guardando…" : "Guardar cita"}</Button></div></form></Modal>
 
-        {view === "day" && (
-          selectedItems.length ? <div className="timeline">{selectedItems.map((item) => (
-            <article className="timeline-item" key={item.id}>
-              <time>{item.time}</time>
-              <div className="timeline-line"><i /></div>
-              <div className="appointment-card">
-                <div>
-                  <strong>{patientName(item.patientId)}</strong>
-                  <span>{item.reason} · {item.duration} min</span>
-                  <small>{item.professional}</small>
-                </div>
-                <div className="appointment-actions">
-                  <StatusBadge status={item.status} />
-                  {item.status === "Confirmada" && <Button variant="secondary" onClick={() => { setActive(item); requestStatusChange("En espera"); }}>Registrar llegada</Button>}
-                  <button className="row-menu" aria-label={`Opciones de ${patientName(item.patientId)}`} onClick={() => openActions(item)}><MoreHorizontal /></button>
-                </div>
-              </div>
-            </article>
-          ))}</div> : <EmptyState title="Sin citas" description="No hay citas para esta fecha y profesional." />
-        )}
+    <Modal open={modal === "detail" && !!active} title="Detalle de la cita" onClose={closeModal}>{detailLoading ? <LoadingState rows={4} /> : active && <><div className={styles.detailGrid}><div className={styles.fullDetail}><span>Paciente</span><strong>{active.patient.name}</strong><small>{active.patient.code} · {active.patient.phone}</small></div><div><span>Fecha</span><strong>{formatLongDate(appointmentDate(active.scheduledAt))}</strong></div><div><span>Hora</span><strong>{appointmentTime(active.scheduledAt)}</strong></div><div className={styles.fullDetail}><span>Profesional</span><strong>{active.professional.name}</strong></div><div><span>Estado</span><StatusBadge status={statusLabels[active.status]} /></div><div><span>Última actualización</span><strong>{new Date(active.updatedAt).toLocaleString("es-GT")}</strong></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className={styles.detailActions}>{canManageSchedule && active.status === "scheduled" && <Button variant="secondary" onClick={() => { setFormError(""); setModal("reschedule"); }}><CalendarClock size={16} /> Reprogramar</Button>}{canUpdateStatus && active.status === "scheduled" && <><Button onClick={() => { setModal(null); setPendingStatus("COMPLETED"); }}><CalendarCheck size={16} /> Completar</Button><Button variant="danger" onClick={() => { setModal(null); setPendingStatus("CANCELLED"); }}><Ban size={16} /> Cancelar</Button></>}</div></>}</Modal>
 
-        {view === "week" && (
-          <div className={styles.calendarScroll}>
-            <div className={styles.weekGrid}>
-              {visibleDates.map((date) => <div className={styles.dayHeader} key={`head-${date}`}>{formatShortDate(date)}</div>)}
-              {visibleDates.map((date) => (
-                <div className={`${styles.dayColumn} ${date === DEMO_TODAY ? styles.todayCell : ""}`} key={date}>
-                  <div className={styles.compactList}>{appointmentsFor(date).map(renderCompactAppointment)}</div>
-                  {!appointmentsFor(date).length && <div className={styles.emptyDay}>Sin citas</div>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+    <Modal open={modal === "reschedule" && !!active} title="Reprogramar cita" description={active ? `${active.patient.name} · ${active.professional.name}` : ""} onClose={closeModal}>{active && <form className="form-grid" onSubmit={submitReschedule}><label className="field"><span>Nueva fecha *</span><input name="date" type="date" defaultValue={appointmentDate(active.scheduledAt)} min={localDate(new Date())} /></label><label className="field"><span>Nueva hora *</span><input name="time" type="time" defaultValue={appointmentTime(active.scheduledAt)} /></label>{formError && <p className="form-error full" role="alert">{formError}</p>}<div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("detail")} disabled={busy}>Volver</Button><Button type="submit" disabled={busy}>{busy ? "Reprogramando…" : "Confirmar reprogramación"}</Button></div></form>}</Modal>
 
-        {view === "month" && (
-          <div className={styles.calendarScroll}>
-            <div className={styles.monthGrid}>
-              {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => <div className={styles.monthHeader} key={day}>{day}</div>)}
-              {visibleDates.map((date) => (
-                <div className={`${styles.monthCell} ${!isSameMonth(date, selectedDate) ? styles.outsideMonth : ""} ${date === DEMO_TODAY ? styles.todayCell : ""}`} key={date}>
-                  <div className={styles.dateNumber}>{Number(date.slice(-2))}{date === DEMO_TODAY && <span>Hoy</span>}</div>
-                  <div className={styles.compactList}>{appointmentsFor(date).map(renderCompactAppointment)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
+    <ConfirmDialog open={pendingStatus !== null} title={pendingStatus === "COMPLETED" ? "Completar cita" : "Cancelar cita"} message={pendingStatus === "COMPLETED" ? "Esta transición marcará la cita como completada en el backend y no podrá revertirse." : "Esta transición cancelará la cita en el backend y liberará el horario."} confirmLabel={pendingStatus === "COMPLETED" ? "Completar cita" : "Cancelar cita"} danger={pendingStatus === "CANCELLED"} onClose={() => { if (!busy) setPendingStatus(null); }} onConfirm={() => void confirmStatusChange()} />
+  </>;
+}
 
-      <Modal open={modal === "schedule"} title="Agendar cita" description="La cita se registra directamente como confirmada por la clínica." onClose={() => setModal(null)}>
-        <form className="form-grid" onSubmit={submitNew}>
-          <label className="field full"><span>Paciente *</span><select name="patientId" defaultValue={initialPatientId}><option value="" disabled>Seleccionar paciente</option>{patients.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</select></label>
-          <label className="field"><span>Fecha *</span><input name="date" type="date" defaultValue={selectedDate} /></label>
-          <label className="field"><span>Hora *</span><input name="time" type="time" defaultValue="09:00" /></label>
-          <label className="field"><span>Duración *</span><select name="duration" defaultValue="45"><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">60 minutos</option><option value="90">90 minutos</option></select></label>
-          <label className="field"><span>Profesional *</span><select name="professional" defaultValue={professional === "Todos" ? professionals[0] : professional}>{professionals.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label className="field full"><span>Motivo *</span><input name="reason" placeholder="Ej. Evaluación inicial" /></label>
-          {error && <p className="form-error full">{error}</p>}
-          {!!suggestedSlots.length && <div className={`${styles.slotSuggestions} full`}><strong>Horarios disponibles cercanos</strong><div>{suggestedSlots.map((slot) => <span key={`${slot.date}-${slot.time}`}>{slot.time} · {slot.duration} min</span>)}</div><small>Selecciona uno de estos horarios en el campo de hora.</small></div>}
-          <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal(null)}>Cancelar</Button><Button type="submit"><Clock3 size={17} /> Guardar cita</Button></div>
-        </form>
-      </Modal>
-
-      <Modal open={modal === "actions" && !!active} title="Acciones de la cita" description={active ? `${patientName(active.patientId)} · ${active.date} ${active.time}` : ""} onClose={() => setModal(null)}>
-        {active && <div className={styles.actionList}>
-          <button onClick={() => setModal("detail")}><Eye size={17} /> Ver detalle completo</button>
-          <button onClick={() => { setError(""); setSuggestedSlots([]); setModal("edit"); }}><Pencil size={17} /> Editar información</button>
-          <button onClick={() => { setError(""); setSuggestedSlots([]); setModal("reschedule"); }}><CalendarClock size={17} /> Reprogramar fecha y hora</button>
-          {active.status === "Confirmada" && <button onClick={() => requestStatusChange("En espera")}><DoorOpen size={17} /> Registrar llegada</button>}
-          {!closedStatuses.includes(active.status) && active.status !== "Atendida" && <button className={styles.dangerAction} onClick={() => requestStatusChange("No asistió")}><UserX size={17} /> Marcar inasistencia</button>}
-          {!closedStatuses.includes(active.status) && active.status !== "Atendida" && <button className={styles.dangerAction} onClick={() => requestStatusChange("Cancelada")}><Ban size={17} /> Cancelar cita</button>}
-        </div>}
-      </Modal>
-
-      <Modal open={modal === "detail" && !!active} title="Detalle de la cita" onClose={() => setModal("actions")}>
-        {active && <div className={styles.detailGrid}>
-          <div className={styles.fullDetail}><span>Paciente</span><strong>{patientName(active.patientId)}</strong></div>
-          <div><span>Fecha</span><strong>{formatLongDate(active.date)}</strong></div>
-          <div><span>Hora y duración</span><strong>{active.time} · {active.duration} min</strong></div>
-          <div className={styles.fullDetail}><span>Profesional</span><strong>{active.professional}</strong></div>
-          <div className={styles.fullDetail}><span>Motivo</span><strong>{active.reason}</strong></div>
-          <div><span>Estado</span><StatusBadge status={active.status} /></div>
-          <div><span>Origen</span><strong>{active.source}</strong></div>
-          {active.proposedDate && active.proposedTime && <div className={styles.fullDetail}><span>Horario propuesto al paciente</span><strong>{formatLongDate(active.proposedDate)} · {active.proposedTime}</strong></div>}
-          {active.notes && <div className={styles.fullDetail}><span>Notas</span><strong>{active.notes}</strong></div>}
-        </div>}
-      </Modal>
-
-      <Modal open={modal === "edit" && !!active} title="Editar cita" description="Actualiza la información operativa sin cambiar la fecha ni hora." onClose={() => setModal("actions")}>
-        {active && <form className="form-grid" key={`edit-${active.id}`} onSubmit={submitEdit}>
-          <label className="field full"><span>Motivo *</span><input name="reason" defaultValue={active.reason} /></label>
-          <label className="field"><span>Profesional *</span><select name="professional" defaultValue={active.professional}>{professionals.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label className="field"><span>Duración (min) *</span><input name="duration" type="number" min="5" step="5" defaultValue={active.duration} /></label>
-          <label className="field full"><span>Notas</span><textarea name="notes" rows={3} defaultValue={active.notes} /></label>
-          {error && <p className="form-error full">{error}</p>}
-          <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("actions")}>Cancelar</Button><Button type="submit">Guardar cambios</Button></div>
-        </form>}
-      </Modal>
-
-      <Modal open={modal === "reschedule" && !!active} title="Reprogramar cita" description={active ? `${patientName(active.patientId)} · ${active.reason}` : ""} onClose={() => setModal("actions")}>
-        {active && <form className="form-grid" key={`reschedule-${active.id}`} onSubmit={submitReschedule}>
-          <label className="field"><span>Nueva fecha *</span><input name="date" type="date" defaultValue={active.date} /></label>
-          <label className="field"><span>Nueva hora *</span><input name="time" type="time" defaultValue={active.time} /></label>
-          {error && <p className="form-error full">{error}</p>}
-          {!!suggestedSlots.length && <div className={`${styles.slotSuggestions} full`}><strong>Alternativas disponibles</strong><div>{suggestedSlots.map((slot) => <span key={`${slot.date}-${slot.time}`}>{slot.time}</span>)}</div><small>Usa una de estas horas para evitar la superposición.</small></div>}
-          <div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("actions")}>Cancelar</Button><Button type="submit">Confirmar reprogramación</Button></div>
-        </form>}
-      </Modal>
-
-      <ConfirmDialog
-        open={pendingStatus !== null}
-        title={pendingStatus === "Cancelada" ? "Cancelar cita" : pendingStatus === "No asistió" ? "Marcar inasistencia" : "Registrar llegada"}
-        message={pendingStatus === "En espera" ? "El paciente aparecerá inmediatamente en Sala de espera." : "La cita conservará su información e historial dentro de la agenda simulada."}
-        confirmLabel={pendingStatus === "Cancelada" ? "Cancelar cita" : pendingStatus === "No asistió" ? "Marcar inasistencia" : "Registrar llegada"}
-        danger={pendingStatus === "Cancelada" || pendingStatus === "No asistió"}
-        onClose={() => setPendingStatus(null)}
-        onConfirm={confirmStatusChange}
-      />
-    </>
-  );
+function mergeById<T extends { id: string }>(current: T[], incoming: T[]) {
+  return Array.from(new Map([...current, ...incoming].map((item) => [item.id, item])).values());
 }
