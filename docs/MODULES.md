@@ -5,7 +5,7 @@
 | `auth` | Autenticación | Base visual preparada |
 | `public-catalog` | Web pública | Base visual preparada |
 | `patients` | Pacientes y ficha administrativa | Implementado en #4 |
-| `appointments` | Panel, agenda, solicitudes, espera y atenciones | Agenda administrativa conectada a `dentalcare-api` |
+| `appointments` | Panel, agenda, solicitudes, espera y atenciones | Agenda, atenciones programadas e indicadores compatibles conectados a `dentalcare-api`; solicitudes y espera pendientes de contrato |
 | `settings` | Usuarios, roles, clínica, catálogos y auditoría | Implementado en #5 |
 | `medical-history` | Antecedentes clínicos | Estructura preparada |
 | `clinical-records` | Expediente clínico | Estructura preparada |

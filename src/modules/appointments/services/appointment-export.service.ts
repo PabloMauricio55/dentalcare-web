@@ -1,10 +1,36 @@
 import type { Appointment, AppointmentAuditEntry } from "../models/appointment";
+import type { AdministrativeAppointment } from "../models/administrative-appointment";
 
 function csvCell(value: string | number) {
   return `"${String(value).replaceAll('"', '""')}"`;
 }
 
 export const appointmentExportService = {
+  downloadAdministrativeCsv(rows: AdministrativeAppointment[], filters: { date: string; professional: string }) {
+    const headers = ["Hora", "Paciente", "Código", "Teléfono", "Profesional", "Estado"];
+    const content = [
+      ["Fecha de exportación", new Date().toLocaleString("es-GT")].map(csvCell).join(","),
+      ["Filtros aplicados", `Fecha: ${filters.date}; Profesional: ${filters.professional}; Estado: SCHEDULED`].map(csvCell).join(","),
+      "",
+      headers.map(csvCell).join(","),
+      ...rows.map((row) => [
+        new Intl.DateTimeFormat("es-GT", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(row.scheduledAt)),
+        row.patient.name,
+        row.patient.code,
+        row.patient.phone,
+        row.professional.name,
+        "Programada",
+      ].map(csvCell).join(",")),
+    ].join("\r\n");
+    const blob = new Blob([`\uFEFF${content}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jornada-${filters.date}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+
   downloadCsv(rows: Appointment[], patientName: (patientId: string) => string, filters: { date: string; professional: string }) {
     const headers = ["Hora", "Paciente", "Motivo", "Duración (min)", "Profesional", "Estado", "Origen"];
     const exportedAt = new Date().toLocaleString("es-GT");

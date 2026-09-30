@@ -21,3 +21,5 @@ El módulo `appointments` consume el contrato oficial de `dentalcare-api`:
 - `PATCH /api/v1/appointments/{appointmentId}/status`
 
 Los únicos estados admitidos son `SCHEDULED`, `COMPLETED` y `CANCELLED`. La creación envía exclusivamente `patientId`, `professionalId` y `scheduledAt`. La URL base se configura con `NEXT_PUBLIC_API_URL`.
+
+Agenda general, Atenciones programadas y los indicadores compatibles del Panel consumen este contrato. Solicitudes y Sala de espera muestran un estado pendiente porque el backend todavía no publica contratos para solicitud, propuesta de horario, llegada, espera o preparación.

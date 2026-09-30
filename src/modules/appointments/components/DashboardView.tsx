@@ -1,14 +1,54 @@
 "use client";
 
-import { CalendarCheck, Clock3, UserRoundCheck, UsersRound } from "lucide-react";
+import { Ban, CalendarCheck, CheckCircle2, Clock3, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { PageHeader, StatCard, StatusBadge } from "@/shared/components";
-import { useClinicSession } from "./ClinicSessionProvider";
-import { DEMO_TODAY } from "../services/agenda-date.service";
+import { Button, EmptyState, LoadingState, PageHeader, RoleAccessNotice, StatCard, StatusBadge } from "@/shared/components";
+import { useApp } from "@/providers/AppProviders";
+import { useAdministrativeAppointments } from "../hooks/use-administrative-appointments";
+
+function localDate(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function timeOf(value: string) {
+  return new Intl.DateTimeFormat("es-GT", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(value));
+}
 
 export function DashboardView() {
-  const { appointments, patients } = useClinicSession();
-  const today = appointments.filter((item) => item.date === DEMO_TODAY && !["Solicitada","Rechazada","Cancelada","No asistió"].includes(item.status));
-  const nameOf = (id: string) => patients.find((patient) => patient.id === id)?.name ?? "Paciente";
-  return <div className="page-stack"><PageHeader title="Buenos días, Daniel" description="Estas son las tareas prioritarias de la clínica para hoy, 10 de septiembre." /><div className="stats-grid"><StatCard label="Citas de hoy" value={today.length} helper={`${today.filter((item) => item.status === "Confirmada").length} por recibir`} icon={CalendarCheck} /><StatCard label="En sala de espera" value={today.filter((item) => item.status === "En espera").length} helper="Abrir flujo de recepción" icon={Clock3} tone="amber" /><StatCard label="En atención" value={today.filter((item) => item.status === "En atención").length} helper="Consulta clínica activa" icon={UserRoundCheck} tone="green" /><StatCard label="Pacientes registrados" value={patients.length} helper={`${patients.filter((item) => item.accessStatus === "Pendiente").length} accesos pendientes`} icon={UsersRound} tone="blue" /></div><div className="dashboard-columns"><section className="card"><div className="card-heading"><div><h3>Próximas atenciones</h3><p>Agenda inmediata de la sede central</p></div><Link className="button button-secondary" href="/agenda/general">Ver agenda</Link></div><div className="schedule-list">{today.slice(0,4).map((item) => <article key={item.id}><time>{item.time}</time><span className="patient-avatar">{nameOf(item.patientId).split(" ").slice(0,2).map((part) => part[0]).join("")}</span><div><strong>{nameOf(item.patientId)}</strong><small>{item.reason}</small></div><StatusBadge status={item.status} /></article>)}</div></section><aside className="card priority-list"><div className="card-heading"><div><h3>Requiere atención</h3><p>Acciones pendientes</p></div></div><Link href="/agenda/solicitudes"><strong>{appointments.filter((item) => ["Solicitada", "Propuesta enviada", "Pendiente de respuesta"].includes(item.status)).length}</strong><span>Solicitudes por revisar</span></Link><Link href="/agenda/sala-espera"><strong>{today.filter((item) => item.status === "En espera").length}</strong><span>Paciente en sala de espera</span></Link><Link href="/agenda/pacientes"><strong>{patients.filter((item) => item.accessStatus === "Pendiente").length}</strong><span>Acceso de paciente pendiente</span></Link></aside></div></div>;
+  const { role } = useApp();
+  const today = localDate(new Date());
+  const enabled = role !== "Cajero";
+  const { appointments, total, loading, error, reload } = useAdministrativeAppointments({
+    from: new Date(`${today}T00:00:00`).toISOString(),
+    to: new Date(`${today}T23:59:59.999`).toISOString(),
+    size: 100,
+  }, enabled);
+  const scheduled = appointments.filter((item) => item.status === "scheduled");
+  const completed = appointments.filter((item) => item.status === "completed");
+  const cancelled = appointments.filter((item) => item.status === "cancelled");
+  const upcoming = [...scheduled].sort((left, right) => left.scheduledAt.localeCompare(right.scheduledAt)).slice(0, 4);
+  const dateLabel = new Intl.DateTimeFormat("es-GT", { dateStyle: "long" }).format(new Date(`${today}T12:00:00`));
+
+  if (!enabled) return <div className="page-stack"><PageHeader title="Panel de inicio" description="Resumen operativo de la clínica" /><RoleAccessNotice role={role}>El backend no permite que Caja consulte la agenda administrativa.</RoleAccessNotice></div>;
+
+  return <div className="page-stack">
+    <PageHeader title="Buenos días, Daniel" description={`Resumen real de citas para ${dateLabel}.`} />
+    {error && <div role="alert" className="role-access-notice"><span><RefreshCw size={21} /></span><div><strong>No se pudo cargar el resumen</strong><p>{error}</p><Button variant="secondary" onClick={reload}>Reintentar</Button></div></div>}
+    <div className="stats-grid">
+      <StatCard label="Citas del día" value={loading ? "—" : total} helper="Total devuelto por la API" icon={CalendarCheck} />
+      <StatCard label="Programadas" value={loading ? "—" : scheduled.length} helper="Pendientes de realizar" icon={Clock3} tone="blue" />
+      <StatCard label="Completadas" value={loading ? "—" : completed.length} helper="Finalizadas hoy" icon={CheckCircle2} tone="green" />
+      <StatCard label="Canceladas" value={loading ? "—" : cancelled.length} helper="Canceladas hoy" icon={Ban} tone="amber" />
+    </div>
+    <div className="dashboard-columns">
+      <section className="card">
+        <div className="card-heading"><div><h3>Próximas atenciones programadas</h3><p>Información obtenida de dentalcare-api</p></div><Link className="button button-secondary" href="/agenda/general">Ver agenda</Link></div>
+        {loading ? <LoadingState rows={4} /> : upcoming.length ? <div className="schedule-list">{upcoming.map((item) => <article key={item.id}><time>{timeOf(item.scheduledAt)}</time><span className="patient-avatar">{item.patient.name.split(" ").slice(0, 2).map((part) => part[0]).join("")}</span><div><strong>{item.patient.name}</strong><small>{item.professional.name}</small></div><StatusBadge status="Programada" /></article>)}</div> : !error && <EmptyState title="Sin citas programadas" description="No existen próximas atenciones para hoy." />}
+      </section>
+      <aside className="card priority-list"><div className="card-heading"><div><h3>Accesos rápidos</h3><p>Funciones disponibles con el contrato actual</p></div></div><Link href="/agenda/atenciones"><strong>{scheduled.length}</strong><span>Atenciones programadas</span></Link><Link href="/agenda/general"><strong>{completed.length}</strong><span>Citas completadas hoy</span></Link><Link href="/agenda/general"><strong>{cancelled.length}</strong><span>Citas canceladas hoy</span></Link></aside>
+    </div>
+  </div>;
 }
