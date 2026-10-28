@@ -1,6 +1,11 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useEffect } from "react";
+
+let openModalCount = 0;
+let previousBodyOverflow = "";
+let previousHtmlOverflow = "";
 
 export function Modal({ open, title, description, children, footer, onClose }: {
   open: boolean;
@@ -10,6 +15,28 @@ export function Modal({ open, title, description, children, footer, onClose }: {
   footer?: React.ReactNode;
   onClose: () => void;
 }) {
+  useEffect(() => {
+    if (!open) return;
+
+    if (openModalCount === 0) {
+      previousBodyOverflow = document.body.style.overflow;
+      previousHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    }
+
+    openModalCount += 1;
+
+    return () => {
+      openModalCount = Math.max(0, openModalCount - 1);
+
+      if (openModalCount === 0) {
+        document.body.style.overflow = previousBodyOverflow;
+        document.documentElement.style.overflow = previousHtmlOverflow;
+      }
+    };
+  }, [open]);
+
   if (!open) return null;
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>

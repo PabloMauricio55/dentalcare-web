@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, CalendarCheck, CalendarClock, CalendarPlus, ChevronLeft, ChevronRight, Eye, RefreshCw } from "lucide-react";
+import { Ban, CalendarClock, CalendarPlus, ChevronLeft, ChevronRight, Eye, RefreshCw } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { ActionNotice, Button, ConfirmDialog, EmptyState, LoadingState, Modal, PageHeader, RoleAccessNotice, StatusBadge } from "@/shared/components";
 import { useApp } from "@/providers/AppProviders";
@@ -12,7 +12,7 @@ import styles from "./agenda.module.css";
 
 type AgendaView = "day" | "week" | "month";
 type AgendaModal = "schedule" | "detail" | "reschedule" | null;
-type PendingStatus = "COMPLETED" | "CANCELLED" | null;
+type PendingStatus = "CANCELLED" | null;
 
 const viewLabels: Record<AgendaView, string> = { day: "Día", week: "Semana", month: "Mes" };
 const statusLabels: Record<AdministrativeAppointmentStatus, string> = { scheduled: "Programada", completed: "Completada", cancelled: "Cancelada" };
@@ -185,7 +185,7 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
       await administrativeAppointmentService.updateStatus(active.id, { status: pendingStatus });
       setPendingStatus(null);
       setActive(null);
-      setNotice(pendingStatus === "COMPLETED" ? "La cita quedó completada." : "La cita quedó cancelada.");
+      setNotice("La cita quedó cancelada y el horario volvió a estar disponible.");
       setReloadKey((key) => key + 1);
     } catch (error) { setPendingStatus(null); setLoadError(readableError(error)); }
     finally { setBusy(false); }
@@ -215,11 +215,11 @@ export function GeneralAgendaView({ initialPatientId = "", openSchedule = false 
 
     <Modal open={modal === "schedule"} title="Agendar cita" description="Se guardará directamente en DentalCare API como una cita programada." onClose={closeModal}><form className="form-grid" onSubmit={submitNew} noValidate><label className="field full"><span>ID del paciente *</span><input name="patientId" list="create-patients" defaultValue={initialPatientId} placeholder="UUID del paciente" autoComplete="off" /><datalist id="create-patients">{patientOptions.map((patient) => <option value={patient.id} key={patient.id}>{patient.name} · {patient.code}</option>)}</datalist></label><label className="field full"><span>ID del profesional *</span><input name="professionalId" list="create-professionals" placeholder="UUID del profesional" autoComplete="off" /><datalist id="create-professionals">{professionalOptions.map((professional) => <option value={professional.id} key={professional.id}>{professional.name}</option>)}</datalist></label><label className="field"><span>Fecha *</span><input name="date" type="date" defaultValue={selectedDate} min={localDate(new Date())} /></label><label className="field"><span>Hora *</span><input name="time" type="time" defaultValue="09:00" /></label>{formError && <p className="form-error full" role="alert">{formError}</p>}<div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={closeModal} disabled={busy}>Cancelar</Button><Button type="submit" disabled={busy}>{busy ? "Guardando…" : "Guardar cita"}</Button></div></form></Modal>
 
-    <Modal open={modal === "detail" && !!active} title="Detalle de la cita" onClose={closeModal}>{detailLoading ? <LoadingState rows={4} /> : active && <><div className={styles.detailGrid}><div className={styles.fullDetail}><span>Paciente</span><strong>{active.patient.name}</strong><small>{active.patient.code} · {active.patient.phone}</small></div><div><span>Fecha</span><strong>{formatLongDate(appointmentDate(active.scheduledAt))}</strong></div><div><span>Hora</span><strong>{appointmentTime(active.scheduledAt)}</strong></div><div className={styles.fullDetail}><span>Profesional</span><strong>{active.professional.name}</strong></div><div><span>Estado</span><StatusBadge status={statusLabels[active.status]} /></div><div><span>Última actualización</span><strong>{new Date(active.updatedAt).toLocaleString("es-GT")}</strong></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className={styles.detailActions}>{canManageSchedule && active.status === "scheduled" && <Button variant="secondary" onClick={() => { setFormError(""); setModal("reschedule"); }}><CalendarClock size={16} /> Reprogramar</Button>}{canUpdateStatus && active.status === "scheduled" && <><Button onClick={() => { setModal(null); setPendingStatus("COMPLETED"); }}><CalendarCheck size={16} /> Completar</Button><Button variant="danger" onClick={() => { setModal(null); setPendingStatus("CANCELLED"); }}><Ban size={16} /> Cancelar</Button></>}</div></>}</Modal>
+    <Modal open={modal === "detail" && !!active} title="Detalle de la cita" onClose={closeModal}>{detailLoading ? <LoadingState rows={4} /> : active && <><div className={styles.detailGrid}><div className={styles.fullDetail}><span>Paciente</span><strong>{active.patient.name}</strong><small>{active.patient.code} · {active.patient.phone}</small></div><div><span>Fecha</span><strong>{formatLongDate(appointmentDate(active.scheduledAt))}</strong></div><div><span>Hora</span><strong>{appointmentTime(active.scheduledAt)}</strong></div><div className={styles.fullDetail}><span>Profesional</span><strong>{active.professional.name}</strong></div><div><span>Estado</span><StatusBadge status={statusLabels[active.status]} /></div><div><span>Última actualización</span><strong>{new Date(active.updatedAt).toLocaleString("es-GT")}</strong></div></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className={styles.detailActions}>{canManageSchedule && active.status === "scheduled" && <Button variant="secondary" onClick={() => { setFormError(""); setModal("reschedule"); }}><CalendarClock size={16} /> Reprogramar</Button>}{canUpdateStatus && active.status === "scheduled" && <Button variant="danger" onClick={() => { setModal(null); setPendingStatus("CANCELLED"); }}><Ban size={16} /> Cancelar</Button>}</div></>}</Modal>
 
     <Modal open={modal === "reschedule" && !!active} title="Reprogramar cita" description={active ? `${active.patient.name} · ${active.professional.name}` : ""} onClose={closeModal}>{active && <form className="form-grid" onSubmit={submitReschedule}><label className="field"><span>Nueva fecha *</span><input name="date" type="date" defaultValue={appointmentDate(active.scheduledAt)} min={localDate(new Date())} /></label><label className="field"><span>Nueva hora *</span><input name="time" type="time" defaultValue={appointmentTime(active.scheduledAt)} /></label>{formError && <p className="form-error full" role="alert">{formError}</p>}<div className="modal-form-actions full"><Button variant="ghost" type="button" onClick={() => setModal("detail")} disabled={busy}>Volver</Button><Button type="submit" disabled={busy}>{busy ? "Reprogramando…" : "Confirmar reprogramación"}</Button></div></form>}</Modal>
 
-    <ConfirmDialog open={pendingStatus !== null} title={pendingStatus === "COMPLETED" ? "Completar cita" : "Cancelar cita"} message={pendingStatus === "COMPLETED" ? "Esta transición marcará la cita como completada en el backend y no podrá revertirse." : "Esta transición cancelará la cita en el backend y liberará el horario."} confirmLabel={pendingStatus === "COMPLETED" ? "Completar cita" : "Cancelar cita"} danger={pendingStatus === "CANCELLED"} onClose={() => { if (!busy) setPendingStatus(null); }} onConfirm={() => void confirmStatusChange()} />
+    <ConfirmDialog open={pendingStatus !== null} title="Cancelar cita" message="¿Estás seguro de que deseas cancelar esta cita? El horario volverá a estar disponible y esta acción no se puede deshacer." confirmLabel="Sí, cancelar cita" danger showCancel={false} onClose={() => { if (!busy) setPendingStatus(null); }} onConfirm={() => void confirmStatusChange()} />
   </>;
 }
 
